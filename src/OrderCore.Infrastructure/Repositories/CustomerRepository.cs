@@ -25,5 +25,11 @@ namespace OrderCore.Infrastructure.Repositories
             return await  _dbContext.Customers
                 .FirstOrDefaultAsync(c => c.Email == email, cancellationToken);
         }
+
+        public async Task<Customer?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Customers
+                .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        }
     }
 }
