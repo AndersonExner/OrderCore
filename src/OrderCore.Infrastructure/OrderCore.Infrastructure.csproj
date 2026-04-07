@@ -1,9 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <Compile Remove="Persistence\Configuration\**" />
+    <EmbeddedResource Remove="Persistence\Configuration\**" />
+    <None Remove="Persistence\Configuration\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\OrderCore.Application\OrderCore.Application.csproj" />
     <ProjectReference Include="..\OrderCore.Domain\OrderCore.Domain.csproj" />
     <ProjectReference Include="..\OrderCore.Contracts\OrderCore.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
   </ItemGroup>
 
   <PropertyGroup>

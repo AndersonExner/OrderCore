@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderCore.Api", "src\OrderCore.Api\OrderCore.Api.csproj", "{4024E410-0533-4DD4-9C99-CCACAEF6DAA6}"
 EndProject
@@ -127,5 +130,8 @@ Global
 		{2269FB55-62E3-43CC-804C-B7DFD80181FE} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{4F449751-F184-4234-9BAC-6E9EF982B9A4} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{08C17671-44B3-420D-86E0-BF36EC0F6B7E} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {40810271-C12D-4D56-A031-BD08B3270AFF}
 	EndGlobalSection
 EndGlobal
