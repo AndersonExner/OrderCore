@@ -6,5 +6,6 @@ namespace OrderCore.Application.Abstractions.Repositories
     {
         Task AddAsync(Customer customer, CancellationToken cancellationToken = default);
         Task<Customer?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+        Task<Customer?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     }
 }
