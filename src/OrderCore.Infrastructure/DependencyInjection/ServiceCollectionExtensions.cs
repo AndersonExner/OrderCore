@@ -17,6 +17,7 @@ namespace OrderCore.Infrastructure.DependencyInjection
                 options.UseNpgsql(connectionString));
 
             services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             return services;
         }
