@@ -2,6 +2,8 @@ using OrderCore.Application.Customers.Commands;
 using OrderCore.Application.Customers.Queries;
 using OrderCore.Application.Products.Commands;
 using OrderCore.Application.Products.Queries;
+using OrderCore.Application.Orders.Commands;
+using OrderCore.Application.Orders.Queries;
 using OrderCore.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,9 @@ builder.Services.AddScoped<GetCustomerByIdService>();
 builder.Services.AddScoped<CreateProductService>();
 builder.Services.AddScoped<GetProductByIdService>();
 builder.Services.AddScoped<GetProductsService>();
+builder.Services.AddScoped<CreateOrderService>();
+builder.Services.AddScoped<GetOrderByIdService>();
+builder.Services.AddScoped<GetOrdersService>();
 
 var app = builder.Build();
 
