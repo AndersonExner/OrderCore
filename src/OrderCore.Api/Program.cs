@@ -5,8 +5,20 @@ using OrderCore.Application.Products.Queries;
 using OrderCore.Application.Orders.Commands;
 using OrderCore.Application.Orders.Queries;
 using OrderCore.Infrastructure.DependencyInjection;
+using OrderCore.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -22,20 +34,11 @@ builder.Services.AddScoped<GetCustomerByIdService>();
 builder.Services.AddScoped<CreateProductService>();
 builder.Services.AddScoped<GetProductByIdService>();
 builder.Services.AddScoped<GetProductsService>();
+
 builder.Services.AddScoped<CreateOrderService>();
 builder.Services.AddScoped<GetOrderByIdService>();
 builder.Services.AddScoped<GetOrdersService>();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Frontend", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:5173")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
 
 var app = builder.Build();
 
@@ -46,7 +49,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseCors("Frontend");
+
+app.UseGlobalExceptionMiddleware();
+
 app.UseAuthorization();
 app.MapControllers();
 
