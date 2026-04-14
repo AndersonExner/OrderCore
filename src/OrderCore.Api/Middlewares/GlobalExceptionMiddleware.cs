@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using OrderCore.Api.Models;
+using OrderCore.Application.Commom.Exceptions;
+using OrderCore.Application.Common.Exceptions;
+using System.Net;
 using System.Text.Json;
-using OrderCore.Api.Models;
 
 namespace OrderCore.Api.Middlewares
 {
@@ -24,6 +26,7 @@ namespace OrderCore.Api.Middlewares
                 await HandleExceptionAsync(context, ex);
             }
         }
+
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             var response = new ErrorResponse();
@@ -31,15 +34,27 @@ namespace OrderCore.Api.Middlewares
 
             switch (exception)
             {
-                case ArgumentException:
+                case ValidationException:
                     statusCode = HttpStatusCode.BadRequest;
-                    response.Title = "Invalid request";
+                    response.Title = "Validation error";
                     response.Detail = exception.Message;
                     break;
 
-                case InvalidOperationException:
-                    statusCode = HttpStatusCode.BadRequest;
+                case BusinessRuleException:
+                    statusCode = HttpStatusCode.Conflict;
                     response.Title = "Business rule violation";
+                    response.Detail = exception.Message;
+                    break;
+
+                case NotFoundException:
+                    statusCode = HttpStatusCode.NotFound;
+                    response.Title = "Resource not found";
+                    response.Detail = exception.Message;
+                    break;
+
+                case ArgumentException:
+                    statusCode = HttpStatusCode.BadRequest;
+                    response.Title = "Invalid request";
                     response.Detail = exception.Message;
                     break;
 
