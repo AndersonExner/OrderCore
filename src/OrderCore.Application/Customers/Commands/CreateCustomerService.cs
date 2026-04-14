@@ -1,6 +1,7 @@
 ﻿using OrderCore.Application.Abstractions.Repositories;
 using OrderCore.Application.Customers.Dtos;
 using OrderCore.Domain.Entities;
+using OrderCore.Application.Commom.Exceptions;
 
 namespace OrderCore.Application.Customers.Commands
 {
@@ -20,7 +21,7 @@ namespace OrderCore.Application.Customers.Commands
             var existingCustomer = await _customerRepository.GetByEmailAsync(request.Email, cancellationToken);
 
             if (existingCustomer is not null)
-                throw new InvalidOperationException("A customer with the same email already exists.");
+                throw new BusinessRuleException("A customer with the same email already exists.");
 
             var newCustomer = new Customer(request.Name, request.Email);
 

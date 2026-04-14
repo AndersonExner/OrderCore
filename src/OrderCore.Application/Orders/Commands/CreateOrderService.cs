@@ -1,4 +1,5 @@
 ﻿using OrderCore.Application.Abstractions.Repositories;
+using OrderCore.Application.Commom.Exceptions;
 using OrderCore.Application.Orders.Dtos;
 using OrderCore.Domain.Entities;
 
@@ -25,12 +26,12 @@ namespace OrderCore.Application.Orders.Commands
             CancellationToken cancellationToken = default)
         {
             if (request.Items is null || request.Items.Count == 0)
-                throw new InvalidOperationException("Order must have at least one item.");
+                throw new ValidationException("Order must have at least one item.");
 
             var customer = await _customerRepository.GetByIdAsync(request.CustomerId, cancellationToken);
 
             if (customer is null)
-                throw new InvalidOperationException("Customer not found.");
+                throw new NotFoundException("Customer not found.");
 
             var order = new Order(request.CustomerId);
 
@@ -39,7 +40,7 @@ namespace OrderCore.Application.Orders.Commands
                 var product = await _productRepository.GetByIdAsync(itemRequest.ProductId, cancellationToken);
 
                 if (product is null)
-                    throw new InvalidOperationException($"Product {itemRequest.ProductId} not found.");
+                    throw new NotFoundException($"Product {itemRequest.ProductId} not found.");
 
                 order.AddItem(product.Id, product.Name, product.Price, itemRequest.Quantity);
             }

@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Moq;
 using OrderCore.Application.Abstractions.Repositories;
+using OrderCore.Application.Commom.Exceptions;
 using OrderCore.Application.Customers.Commands;
 using OrderCore.Application.Customers.Dtos;
 using OrderCore.Domain.Entities;
@@ -73,7 +74,7 @@ namespace OrderCore.UnitTests.Application
             Func<Task> action = async () => await _service.ExecuteAsync(request, CancellationToken.None);
 
             // Assert
-            await action.Should().ThrowAsync<InvalidOperationException>()
+            await action.Should().ThrowAsync<BusinessRuleException>()
                 .WithMessage("*already exists*");
 
             _customerRepositoryMock.Verify(
