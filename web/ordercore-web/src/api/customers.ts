@@ -18,3 +18,7 @@ export async function createCustomer(request: CreateCustomerRequest) {
 export async function getCustomerById(id: string) {
   return getJson<CustomerResponse>(`/api/customers/${id}`);
 }
+
+export async function getCustomers() {
+  return getJson<CustomerResponse[]>("/api/customers");
+}
