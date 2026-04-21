@@ -27,10 +27,22 @@ export type OrderResponse = {
   items: OrderItemResponse[];
 };
 
+export type OrderListResponse = {
+  id: string;
+  customerId: string;
+  status: string;
+  createdAtUtc: string;
+  totalAmount: number;
+};
+
 export async function createOrder(request: CreateOrderRequest) {
   return postJson<OrderResponse, CreateOrderRequest>("/api/orders", request);
 }
 
 export async function getOrders() {
-  return getJson<OrderResponse[]>("/api/orders");
+  return getJson<OrderListResponse[]>("/api/orders");
+}
+
+export async function getOrderById(id: string) {
+  return getJson<OrderResponse>(`/api/orders/${id}`);
 }
