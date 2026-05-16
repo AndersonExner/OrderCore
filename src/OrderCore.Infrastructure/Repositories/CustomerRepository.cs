@@ -32,6 +32,15 @@ namespace OrderCore.Infrastructure.Repositories
                 .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         }
 
+        public async Task<Customer?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+        {
+            var normalizedName = name.ToLowerInvariant();
+
+            return await _dbContext.Customers
+                .OrderBy(c => c.Name)
+                .FirstOrDefaultAsync(c => c.Name.ToLower().Contains(normalizedName), cancellationToken);
+        }
+
         public async Task<IReadOnlyList<Customer>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             return await _dbContext.Customers

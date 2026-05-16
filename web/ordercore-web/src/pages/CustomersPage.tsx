@@ -1,13 +1,13 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-import { createCustomer, getCustomerById } from "../api/customers";
+import { createCustomer, searchCustomer } from "../api/customers";
 import type { CustomerResponse } from "../api/customers";
 
 export default function CustomersPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [customerId, setCustomerId] = useState("");
+  const [customerSearch, setCustomerSearch] = useState("");
   const [customer, setCustomer] = useState<CustomerResponse | null>(null);
   const [message, setMessage] = useState("");
 
@@ -32,7 +32,7 @@ export default function CustomersPage() {
     setMessage("");
 
     try {
-      const result = await getCustomerById(customerId);
+      const result = await searchCustomer(customerSearch);
       setCustomer(result);
     } catch (error) {
       setCustomer(null);
@@ -109,9 +109,9 @@ export default function CustomersPage() {
           <h3 style={{ margin: 0 }}>Find customer</h3>
 
           <input
-            placeholder="Customer id"
-            value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
+            placeholder="Customer id, email, or name"
+            value={customerSearch}
+            onChange={(e) => setCustomerSearch(e.target.value)}
             style={{ padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db" }}
           />
 
