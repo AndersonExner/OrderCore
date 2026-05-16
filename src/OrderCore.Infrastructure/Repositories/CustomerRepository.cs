@@ -31,5 +31,11 @@ namespace OrderCore.Infrastructure.Repositories
             return await _dbContext.Customers
                 .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         }
+
+        public async Task<IReadOnlyList<Customer>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Customers
+                .ToListAsync(cancellationToken);
+        }
     }
 }

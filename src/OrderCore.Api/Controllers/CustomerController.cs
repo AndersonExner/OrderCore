@@ -11,13 +11,16 @@ namespace OrderCore.Api.Controllers
     {
         private readonly CreateCustomerService _createCustomerService;
         private readonly GetCustomerByIdService _getCustomerByIdService;
+        private readonly GetCustomersService _getCustomersService;
 
         public CustomersController(
             CreateCustomerService createCustomerService,
-            GetCustomerByIdService getCustomerByIdService)
+            GetCustomerByIdService getCustomerByIdService,
+            GetCustomersService getCustomersService)
         {
             _createCustomerService = createCustomerService;
             _getCustomerByIdService = getCustomerByIdService;
+            _getCustomersService = getCustomersService;
         }
 
         [HttpPost]
@@ -45,6 +48,14 @@ namespace OrderCore.Api.Controllers
             if (response is null)
                 return NotFound();
 
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(IReadOnlyList<GetCustomersResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+        {
+            var response = await _getCustomersService.ExecuteAsync(cancellationToken);
             return Ok(response);
         }
     }
