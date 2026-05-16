@@ -4,13 +4,11 @@ namespace OrderCore.Domain.Entities
 {
     public class Customer : BaseEntity
     {
-        public string Name { get; private set; }
-        public string Email { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public string Email { get; private set; } = string.Empty;
 
         private Customer() 
         {
-            Name = string.Empty;
-            Email = string.Empty;
         }
         
         public Customer(string name, string email)

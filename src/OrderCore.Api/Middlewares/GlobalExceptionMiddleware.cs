@@ -1,5 +1,4 @@
 ﻿using OrderCore.Api.Models;
-using OrderCore.Application.Commom.Exceptions;
 using OrderCore.Application.Common.Exceptions;
 using System.Net;
 using System.Text.Json;

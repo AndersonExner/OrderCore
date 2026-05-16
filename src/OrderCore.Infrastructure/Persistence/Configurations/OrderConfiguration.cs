@@ -4,32 +4,30 @@ using OrderCore.Domain.Entities;
 
 namespace OrderCore.Infrastructure.Persistence.Configurations
 {
-    public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
+    public class OrderConfiguration : IEntityTypeConfiguration<Order>
     {
-        public void Configure(EntityTypeBuilder<OrderItem> builder)
+        public void Configure(EntityTypeBuilder<Order> builder)
         {
-            builder.ToTable("order_items");
+            builder.ToTable("orders");
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.OrderId)
+            builder.Property(x => x.CustomerId)
                 .IsRequired();
 
-            builder.Property(x => x.ProductId)
+            builder.Property(x => x.CreatedAtUtc)
                 .IsRequired();
 
-            builder.Property(x => x.ProductName)
-                .IsRequired()
-                .HasMaxLength(200);
-
-            builder.Property(x => x.UnitPrice)
-                .IsRequired()
-                .HasPrecision(18, 2);
-
-            builder.Property(x => x.Quantity)
+            builder.Property(x => x.Status)
+                .HasConversion<string>()
                 .IsRequired();
 
-            builder.Ignore(x => x.Total);
+            builder.Ignore(x => x.TotalAmount);
+
+            builder.HasMany(x => x.Items)
+                .WithOne()
+                .HasForeignKey(x => x.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -6,9 +6,13 @@ async function parseResponse<T>(response: Response): Promise<T> {
 
     try {
       const errorBody = await response.json();
-      if (errorBody?.message) {
-        errorMessage = errorBody.message;
-      }
+      errorMessage =
+        errorBody?.message ??
+        errorBody?.detail ??
+        errorBody?.Detail ??
+        errorBody?.title ??
+        errorBody?.Title ??
+        errorMessage;
     } catch {
       // ignore json parse errors
     }

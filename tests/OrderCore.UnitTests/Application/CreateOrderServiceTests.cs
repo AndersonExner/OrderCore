@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Moq;
 using OrderCore.Application.Abstractions.Repositories;
-using OrderCore.Application.Commom.Exceptions;
+using OrderCore.Application.Common.Exceptions;
 using OrderCore.Application.Orders.Commands;
 using OrderCore.Application.Orders.Dtos;
 using OrderCore.Domain.Entities;
@@ -70,7 +70,7 @@ namespace OrderCore.UnitTests.Application
             Func<Task> action = async () => await _service.ExecuteAsync(request, CancellationToken.None);
 
             // Assert
-            await action.Should().ThrowAsync<InvalidOperationException>()
+            await action.Should().ThrowAsync<NotFoundException>()
                 .WithMessage("*Customer not found*");
         }
 

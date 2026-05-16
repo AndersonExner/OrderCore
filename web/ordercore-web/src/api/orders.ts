@@ -27,10 +27,12 @@ export type OrderResponse = {
   items: OrderItemResponse[];
 };
 
+export type OrderSummaryResponse = Omit<OrderResponse, "items">;
+
 export async function createOrder(request: CreateOrderRequest) {
   return postJson<OrderResponse, CreateOrderRequest>("/api/orders", request);
 }
 
 export async function getOrders() {
-  return getJson<OrderResponse[]>("/api/orders");
+  return getJson<OrderSummaryResponse[]>("/api/orders");
 }
