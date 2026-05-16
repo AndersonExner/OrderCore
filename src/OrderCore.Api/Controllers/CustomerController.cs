@@ -11,15 +11,18 @@ namespace OrderCore.Api.Controllers
     {
         private readonly CreateCustomerService _createCustomerService;
         private readonly GetCustomerByIdService _getCustomerByIdService;
+        private readonly GetCustomerByIdentifierService _getCustomerByIdentifierService;
         private readonly GetCustomersService _getCustomersService;
 
         public CustomersController(
             CreateCustomerService createCustomerService,
             GetCustomerByIdService getCustomerByIdService,
+            GetCustomerByIdentifierService getCustomerByIdentifierService,
             GetCustomersService getCustomersService)
         {
             _createCustomerService = createCustomerService;
             _getCustomerByIdService = getCustomerByIdService;
+            _getCustomerByIdentifierService = getCustomerByIdentifierService;
             _getCustomersService = getCustomersService;
         }
 
@@ -44,6 +47,20 @@ namespace OrderCore.Api.Controllers
         public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
         {
             var response = await _getCustomerByIdService.ExecuteAsync(id, cancellationToken);
+
+            if (response is null)
+                return NotFound();
+
+            return Ok(response);
+        }
+
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(GetCustomerByIdResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Search([FromQuery] string term, CancellationToken cancellationToken)
+        {
+            var response = await _getCustomerByIdentifierService.ExecuteAsync(term, cancellationToken);
 
             if (response is null)
                 return NotFound();

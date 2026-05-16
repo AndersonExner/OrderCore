@@ -30,6 +30,7 @@ builder.Services.AddInfrastructure(
 
 builder.Services.AddScoped<CreateCustomerService>();
 builder.Services.AddScoped<GetCustomerByIdService>();
+builder.Services.AddScoped<GetCustomerByIdentifierService>();
 builder.Services.AddScoped<GetCustomersService>();
 
 builder.Services.AddScoped<CreateProductService>();

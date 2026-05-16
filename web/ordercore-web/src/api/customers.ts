@@ -19,6 +19,10 @@ export async function getCustomerById(id: string) {
   return getJson<CustomerResponse>(`/api/customers/${id}`);
 }
 
+export async function searchCustomer(term: string) {
+  return getJson<CustomerResponse>(`/api/customers/search?term=${encodeURIComponent(term)}`);
+}
+
 export async function getCustomers() {
   return getJson<CustomerResponse[]>("/api/customers");
 }
