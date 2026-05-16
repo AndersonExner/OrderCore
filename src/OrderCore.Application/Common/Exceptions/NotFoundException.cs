@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OrderCore.Application.Commom.Exceptions
+namespace OrderCore.Application.Common.Exceptions
 {
     public class NotFoundException : Exception
     {

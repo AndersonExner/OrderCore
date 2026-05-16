@@ -8,15 +8,21 @@ The system focuses on:
 - resiliency
 - clean architecture principles
 
-## Tech Stack
+## Current Tech Stack
 
-- .NET 8
+- .NET 10
 - ASP.NET Core
+- Entity Framework Core
 - PostgreSQL
+- React
+- Vite
+
+## Planned
+
 - RabbitMQ
 - Redis
 - Docker
-- Azure (planned)
+- Azure
 
 ## Status
 

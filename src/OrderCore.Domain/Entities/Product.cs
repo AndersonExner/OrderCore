@@ -4,13 +4,12 @@ namespace OrderCore.Domain.Entities;
 
 public class Product : BaseEntity
 {
-    public string Name { get; private set; }
+    public string Name { get; private set; } = string.Empty;
     public decimal Price { get; private set; }
     public int StockQuantity { get; private set; }
 
     private Product()
     {
-        Name = string.Empty;
     }
 
     public Product(string name, decimal price, int stockQuantity)

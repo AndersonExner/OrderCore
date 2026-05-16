@@ -1,7 +1,7 @@
 ﻿using OrderCore.Application.Abstractions.Repositories;
 using OrderCore.Application.Customers.Dtos;
 using OrderCore.Domain.Entities;
-using OrderCore.Application.Commom.Exceptions;
+using OrderCore.Application.Common.Exceptions;
 
 namespace OrderCore.Application.Customers.Commands
 {

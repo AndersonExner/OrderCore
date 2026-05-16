@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using Moq;
 using OrderCore.Application.Abstractions.Repositories;
-using OrderCore.Application.Commom.Exceptions;
+using OrderCore.Application.Common.Exceptions;
 using OrderCore.Application.Customers.Commands;
 using OrderCore.Application.Customers.Dtos;
 using OrderCore.Domain.Entities;
