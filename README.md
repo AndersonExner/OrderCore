@@ -27,3 +27,10 @@ The system focuses on:
 ## Status
 
 🚧 In progress
+
+## Documentation
+
+- [AI agent instructions](AGENTS.md)
+- [Project overview](docs/PROJECT_OVERVIEW.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Development guide](docs/DEVELOPMENT.md)
