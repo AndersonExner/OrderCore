@@ -36,3 +36,11 @@ export async function createOrder(request: CreateOrderRequest) {
 export async function getOrders() {
   return getJson<OrderSummaryResponse[]>("/api/orders");
 }
+
+export async function payOrder(id: string) {
+  return postJson<OrderResponse, Record<string, never>>(`/api/orders/${id}/pay`, {});
+}
+
+export async function cancelOrder(id: string) {
+  return postJson<OrderResponse, Record<string, never>>(`/api/orders/${id}/cancel`, {});
+}

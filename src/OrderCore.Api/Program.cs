@@ -38,6 +38,8 @@ builder.Services.AddScoped<GetProductByIdService>();
 builder.Services.AddScoped<GetProductsService>();
 
 builder.Services.AddScoped<CreateOrderService>();
+builder.Services.AddScoped<PayOrderService>();
+builder.Services.AddScoped<CancelOrderService>();
 builder.Services.AddScoped<GetOrderByIdService>();
 builder.Services.AddScoped<GetOrdersService>();
 

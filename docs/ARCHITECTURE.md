@@ -50,6 +50,8 @@ Main patterns:
 
 Application services orchestrate domain entities and repositories. They should not know how data is stored.
 
+Order processing services coordinate customer lookup, product lookup, stock changes, order status transitions, and repository persistence. Expected business conflicts such as insufficient stock or invalid order status transitions are raised as application exceptions.
+
 ### `OrderCore.Infrastructure`
 
 Contains EF Core persistence details:
@@ -98,6 +100,29 @@ HTTP request
   -> PostgreSQL
   -> DTO response
   -> HTTP response
+```
+
+Order processing flow:
+
+```text
+Create order request
+  -> validate customer and requested items
+  -> load products in batch
+  -> decrease product stock through domain behavior
+  -> create order with item price/name snapshot
+  -> persist tracked product and order changes
+  -> return order DTO
+```
+
+Payment and cancellation flow:
+
+```text
+Order action request
+  -> load order with items
+  -> apply domain status transition
+  -> restore product stock when cancelling a pending order
+  -> persist changes
+  -> return updated order DTO
 ```
 
 Typical read flow:

@@ -6,6 +6,7 @@ namespace OrderCore.Application.Abstractions.Repositories
     {
         Task AddAsync(Product product, CancellationToken cancellationToken = default);
         Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<IReadOnlyList<Product>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken = default);
         Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken cancellationToken = default);
     }
 }
