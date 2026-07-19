@@ -138,11 +138,16 @@ Pay order request
   -> mark order as Paid
   -> save outbox_messages row with Type = OrderPaid and Status = Pending
   -> commit transaction
+  -> background worker reads pending outbox message
+  -> publish message to RabbitMQ exchange ordercore.events
+  -> mark outbox message as Processed
 ```
 
-RabbitMQ is not connected yet. The outbox table is the durable handoff point that message publishing reads from. Message type names are centralized in `OutboxMessageTypes`; the current order lifecycle constants are `OrderCreated`, `OrderPaid`, and `OrderCancelled`.
+The outbox table is the durable handoff point that message publishing reads from. Message type names are centralized in `OutboxMessageTypes`; the current order lifecycle constants are `OrderCreated`, `OrderPaid`, and `OrderCancelled`.
 
-The API hosts an outbox background service. It polls pending or retryable failed messages in batches, publishes them through `IOutboxMessagePublisher`, marks successful messages as `Processed`, and records failed attempts with `RetryCount` and `LastError`. The current publisher logs messages; RabbitMQ can replace this publisher later without changing order payment behavior.
+The API hosts an outbox background service. It polls pending or retryable failed messages in batches, publishes them through `IOutboxMessagePublisher`, marks successful messages as `Processed`, and records failed attempts with `RetryCount` and `LastError`.
+
+Infrastructure can use either the logging publisher or the RabbitMQ publisher. Docker Compose uses RabbitMQ and publishes to the durable topic exchange `ordercore.events`; `OrderPaid` messages use routing key `orders.paid` and are bound to the local queue `ordercore.order-paid`.
 
 Typical read flow:
 
