@@ -11,7 +11,10 @@ The long-term direction is to grow into a distributed backend system that can de
 - Search customers by email or name.
 - Create and list products.
 - Find products by id.
-- Create and list orders.
+- Create orders while decreasing product stock.
+- Pay and cancel pending orders.
+- Cancel pending orders while restoring product stock.
+- List orders.
 - Find orders by id.
 - Enforce basic domain rules for customer data, product pricing and stock, order items, and order status transitions.
 
@@ -27,7 +30,7 @@ A product has a name, price, and stock quantity. Products require a non-empty na
 
 ### Order
 
-An order belongs to a customer and contains order items. Orders start as `Pending`, can be marked as `Paid`, and can be cancelled unless already paid.
+An order belongs to a customer and contains order items. Orders start as `Pending`, can be marked as `Paid`, and can be cancelled unless already paid. Creating an order decreases stock for each product in the order. Cancelling a pending order restores the reserved stock.
 
 ### Order Item
 
@@ -56,6 +59,8 @@ GET  /api/products/{id}
 POST /api/orders
 GET  /api/orders
 GET  /api/orders/{id}
+POST /api/orders/{id}/pay
+POST /api/orders/{id}/cancel
 ```
 
 Swagger is enabled in development and opens under:

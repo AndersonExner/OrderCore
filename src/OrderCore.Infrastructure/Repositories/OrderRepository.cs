@@ -20,6 +20,12 @@ namespace OrderCore.Infrastructure.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task UpdateAsync(Order order, CancellationToken cancellationToken = default)
+        {
+            _context.Orders.Update(order);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         public async Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Orders

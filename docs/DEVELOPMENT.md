@@ -84,6 +84,7 @@ Use unit tests for:
 - application service orchestration
 - validation and expected exceptions
 - repository abstraction interactions
+- stock reservation and restoration behavior in order workflows
 
 Use integration tests for:
 

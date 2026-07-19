@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
-import { createOrder, getOrders } from "../api/orders";
+import { cancelOrder, createOrder, getOrders, payOrder } from "../api/orders";
 import type { OrderSummaryResponse } from "../api/orders";
 
 export default function OrdersPage() {
@@ -10,6 +10,7 @@ export default function OrdersPage() {
   const [quantity, setQuantity] = useState("1");
   const [orders, setOrders] = useState<OrderSummaryResponse[]>([]);
   const [loading, setLoading] = useState(false);
+  const [processingOrderId, setProcessingOrderId] = useState("");
   const [message, setMessage] = useState("");
 
   async function loadOrders() {
@@ -49,6 +50,36 @@ export default function OrdersPage() {
       await loadOrders();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Failed to create order.");
+    }
+  }
+
+  async function handlePay(orderId: string) {
+    setMessage("");
+
+    try {
+      setProcessingOrderId(orderId);
+      await payOrder(orderId);
+      setMessage("Order paid successfully.");
+      await loadOrders();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to pay order.");
+    } finally {
+      setProcessingOrderId("");
+    }
+  }
+
+  async function handleCancel(orderId: string) {
+    setMessage("");
+
+    try {
+      setProcessingOrderId(orderId);
+      await cancelOrder(orderId);
+      setMessage("Order cancelled successfully.");
+      await loadOrders();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to cancel order.");
+    } finally {
+      setProcessingOrderId("");
     }
   }
 
@@ -132,25 +163,70 @@ export default function OrdersPage() {
                 <th style={{ textAlign: "left", padding: "12px" }}>Customer</th>
                 <th style={{ textAlign: "left", padding: "12px" }}>Status</th>
                 <th style={{ textAlign: "left", padding: "12px" }}>Total</th>
+                <th style={{ textAlign: "left", padding: "12px" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
-                <tr key={order.id}>
-                  <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
-                    {new Date(order.createdAtUtc).toLocaleString()}
-                  </td>
-                  <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
-                    {order.customerId}
-                  </td>
-                  <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
-                    {order.status}
-                  </td>
-                  <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
-                    {order.totalAmount}
-                  </td>
-                </tr>
-              ))}
+              {orders.map((order) => {
+                const canProcess = order.status === "Pending";
+                const isProcessing = processingOrderId === order.id;
+
+                return (
+                  <tr key={order.id}>
+                    <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
+                      {new Date(order.createdAtUtc).toLocaleString()}
+                    </td>
+                    <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
+                      {order.customerId}
+                    </td>
+                    <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
+                      {order.status}
+                    </td>
+                    <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>
+                      {order.totalAmount}
+                    </td>
+                    <td
+                      style={{
+                        padding: "12px",
+                        borderTop: "1px solid #e5e7eb",
+                        display: "flex",
+                        gap: "8px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        disabled={!canProcess || isProcessing}
+                        onClick={() => void handlePay(order.id)}
+                        style={{
+                          padding: "8px 10px",
+                          borderRadius: "8px",
+                          border: "none",
+                          background: canProcess ? "#047857" : "#9ca3af",
+                          color: "white",
+                          cursor: canProcess ? "pointer" : "not-allowed",
+                        }}
+                      >
+                        Pay
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!canProcess || isProcessing}
+                        onClick={() => void handleCancel(order.id)}
+                        style={{
+                          padding: "8px 10px",
+                          borderRadius: "8px",
+                          border: "none",
+                          background: canProcess ? "#b91c1c" : "#9ca3af",
+                          color: "white",
+                          cursor: canProcess ? "pointer" : "not-allowed",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
