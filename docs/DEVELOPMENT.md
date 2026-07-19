@@ -45,8 +45,12 @@ docker compose up --build
 The Compose stack starts:
 
 - PostgreSQL on `localhost:5432`.
+- RabbitMQ on `localhost:5672`.
+- RabbitMQ Management on `http://localhost:15672`.
 - API on `http://localhost:5282`.
 - Frontend on `http://localhost:5173`.
+
+RabbitMQ Management uses `ordercore` / `ordercore` in the local Compose stack.
 
 The API container sets `Database__ApplyMigrations=true`, so EF Core migrations are applied during startup.
 
@@ -57,7 +61,14 @@ Outbox__Enabled=true
 Outbox__PollingIntervalSeconds=10
 Outbox__BatchSize=20
 Outbox__MaxRetryCount=5
+Messaging__OutboxPublisher=RabbitMq
+RabbitMq__ExchangeName=ordercore.events
+RabbitMq__OrderPaidQueueName=ordercore.order-paid
 ```
+
+When a paid order is processed by the outbox worker, the API publishes the message to the durable topic exchange `ordercore.events` with routing key `orders.paid`. The local queue `ordercore.order-paid` is declared and bound automatically when `RabbitMq:DeclareTopology=true`.
+
+To run the API without RabbitMQ, keep `Messaging:OutboxPublisher` as `Logging`; this is the default in `appsettings.json`. Docker Compose overrides it to `RabbitMq`.
 
 ## Logging
 

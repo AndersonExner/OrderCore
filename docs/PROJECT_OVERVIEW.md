@@ -16,6 +16,7 @@ The long-term direction is to grow into a distributed backend system that can de
 - Cancel pending orders while restoring product stock.
 - Store an `OrderPaid` outbox message when an order is paid.
 - Process pending outbox messages with a background worker.
+- Publish processed outbox events to RabbitMQ when running through Docker Compose.
 - List orders.
 - Find orders by id.
 - Enforce basic domain rules for customer data, product pricing and stock, order items, and order status transitions.
@@ -34,7 +35,7 @@ A product has a name, price, and stock quantity. Products require a non-empty na
 
 An order belongs to a customer and contains order items. Orders start as `Pending`, can be marked as `Paid`, and can be cancelled unless already paid. Creating an order decreases stock for each product in the order. Cancelling a pending order restores the reserved stock.
 
-When an order is paid, the application stores an `OrderPaid` message in the outbox table in the same database transaction as the order status update. A background worker processes pending messages and marks them as processed. RabbitMQ is not connected yet; the current publisher logs messages and can be replaced later without changing payment behavior.
+When an order is paid, the application stores an `OrderPaid` message in the outbox table in the same database transaction as the order status update. A background worker processes pending messages, publishes them to RabbitMQ through the infrastructure publisher, and marks them as processed.
 
 ### Order Item
 
@@ -90,11 +91,9 @@ The frontend calls the API through helpers in `web/ordercore-web/src/api`, with 
 
 ## Planned Evolution
 
-The README lists the following planned technologies:
+The next planned technologies are:
 
-- RabbitMQ
 - Redis
-- Docker
 - Azure
 
 When these are introduced, prefer documenting the runtime flow and operational assumptions in this folder as part of the same change.

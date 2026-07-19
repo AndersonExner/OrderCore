@@ -14,6 +14,7 @@ The system focuses on:
 - ASP.NET Core
 - Entity Framework Core
 - PostgreSQL
+- RabbitMQ
 - React
 - Vite
 - Docker
@@ -21,7 +22,6 @@ The system focuses on:
 
 ## Planned
 
-- RabbitMQ
 - Redis
 - Azure
 
@@ -38,9 +38,12 @@ Frontend: http://localhost:5173
 API:      http://localhost:5282
 Swagger:  http://localhost:5282/swagger
 Postgres: localhost:5432
+RabbitMQ: localhost:5672
+RabbitMQ Management: http://localhost:15672
 ```
 
 The API applies EF Core migrations automatically when running through Docker Compose.
+RabbitMQ Management uses `ordercore` / `ordercore` in the local Compose stack.
 
 ## Status
 

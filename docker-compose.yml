@@ -16,6 +16,23 @@ services:
       timeout: 5s
       retries: 10
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: ordercore-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ordercore
+      RABBITMQ_DEFAULT_PASS: ordercore
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ordercore-rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   api:
     build:
       context: .
@@ -23,6 +40,8 @@ services:
     container_name: ordercore-api
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -33,6 +52,16 @@ services:
       Outbox__PollingIntervalSeconds: "10"
       Outbox__BatchSize: "20"
       Outbox__MaxRetryCount: "5"
+      Messaging__OutboxPublisher: RabbitMq
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: "5672"
+      RabbitMq__UserName: ordercore
+      RabbitMq__Password: ordercore
+      RabbitMq__VirtualHost: /
+      RabbitMq__ExchangeName: ordercore.events
+      RabbitMq__ExchangeType: topic
+      RabbitMq__OrderPaidQueueName: ordercore.order-paid
+      RabbitMq__DeclareTopology: "true"
       ORDERCORE_LOG_NETWORK_ENABLED: ${ORDERCORE_LOG_NETWORK_ENABLED:-false}
       ORDERCORE_LOG_NETWORK_ADDRESS: ${ORDERCORE_LOG_NETWORK_ADDRESS:-udp4://host.docker.internal:9998}
     ports:
@@ -55,3 +84,4 @@ services:
 volumes:
   ordercore-postgres-data:
   ordercore-api-logs:
+  ordercore-rabbitmq-data:

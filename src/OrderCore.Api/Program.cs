@@ -7,6 +7,7 @@ using OrderCore.Application.Products.Queries;
 using OrderCore.Application.Orders.Commands;
 using OrderCore.Application.Orders.Queries;
 using OrderCore.Infrastructure.DependencyInjection;
+using OrderCore.Infrastructure.Messaging;
 using OrderCore.Api.Extensions;
 using OrderCore.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -33,9 +34,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<OutboxProcessingOptions>(
     builder.Configuration.GetSection(OutboxProcessingOptions.SectionName));
+builder.Services.Configure<RabbitMqOptions>(
+    builder.Configuration.GetSection(RabbitMqOptions.SectionName));
+
+var outboxPublisher = builder.Configuration.GetValue<string>("Messaging:OutboxPublisher")
+    ?? OutboxPublisherTypes.Logging;
 
 builder.Services.AddInfrastructure(
-    builder.Configuration.GetConnectionString("DefaultConnection")!
+    builder.Configuration.GetConnectionString("DefaultConnection")!,
+    outboxPublisher
 );
 
 builder.Services.AddScoped<CreateCustomerService>();
@@ -64,10 +71,11 @@ var applyMigrations = app.Configuration.GetValue<bool>("Database:ApplyMigrations
 var outboxEnabled = app.Configuration.GetValue<bool>($"{OutboxProcessingOptions.SectionName}:Enabled");
 
 startupLogger.LogInformation(
-    "Starting OrderCore API. Environment: {EnvironmentName}, ApplyMigrations: {ApplyMigrations}, OutboxEnabled: {OutboxEnabled}",
+    "Starting OrderCore API. Environment: {EnvironmentName}, ApplyMigrations: {ApplyMigrations}, OutboxEnabled: {OutboxEnabled}, OutboxPublisher: {OutboxPublisher}",
     app.Environment.EnvironmentName,
     applyMigrations,
-    outboxEnabled);
+    outboxEnabled,
+    outboxPublisher);
 
 if (applyMigrations)
 {
