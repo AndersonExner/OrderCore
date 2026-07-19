@@ -29,6 +29,10 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=ordercore;Username=ordercore;Password=ordercore
       Database__ApplyMigrations: "true"
+      Outbox__Enabled: "true"
+      Outbox__PollingIntervalSeconds: "10"
+      Outbox__BatchSize: "20"
+      Outbox__MaxRetryCount: "5"
     ports:
       - "5282:8080"
 

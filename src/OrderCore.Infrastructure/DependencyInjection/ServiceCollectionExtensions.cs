@@ -20,6 +20,7 @@ namespace OrderCore.Infrastructure.DependencyInjection
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IOutboxRepository, OutboxRepository>();
+            services.AddScoped<OrderCore.Application.Abstractions.Messaging.IOutboxMessagePublisher, OrderCore.Infrastructure.Messaging.LoggingOutboxMessagePublisher>();
             services.AddScoped<OrderCore.Application.Abstractions.Persistence.IUnitOfWork, EfUnitOfWork>();
 
             return services;

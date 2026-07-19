@@ -96,6 +96,36 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
     }
 
     [Fact]
+    public async Task Should_Process_Pending_Outbox_Message()
+    {
+        // Arrange
+        var customer = await CreateCustomerAsync();
+        var product = await CreateProductAsync(stockQuantity: 10);
+        var order = await CreateOrderAsync(customer.Id, product.Id, quantity: 2);
+
+        Assert.NotNull(order.Body);
+
+        var payResponse = await _client.PostAsJsonAsync($"/api/orders/{order.Body.Id}/pay", new { });
+        Assert.Equal(HttpStatusCode.OK, payResponse.StatusCode);
+
+        // Act
+        using var scope = _factory.Services.CreateScope();
+        var processor = scope.ServiceProvider.GetRequiredService<OutboxMessageProcessorService>();
+        var processedCount = await processor.ExecuteAsync(batchSize: 20, maxRetryCount: 5);
+
+        // Assert
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var outboxMessage = dbContext.OutboxMessages
+            .Where(x => x.Type == OutboxMessageTypes.OrderPaid)
+            .AsEnumerable()
+            .Single(x => x.Payload.Contains(order.Body.Id.ToString()));
+
+        Assert.True(processedCount >= 1);
+        Assert.Equal(OutboxMessageStatus.Processed, outboxMessage.Status);
+        Assert.NotNull(outboxMessage.ProcessedAtUtc);
+    }
+
+    [Fact]
     public async Task Should_Cancel_Pending_Order_And_Restore_Product_Stock()
     {
         // Arrange

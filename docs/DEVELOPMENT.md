@@ -50,6 +50,15 @@ The Compose stack starts:
 
 The API container sets `Database__ApplyMigrations=true`, so EF Core migrations are applied during startup.
 
+The Compose stack also enables the outbox worker:
+
+```text
+Outbox__Enabled=true
+Outbox__PollingIntervalSeconds=10
+Outbox__BatchSize=20
+Outbox__MaxRetryCount=5
+```
+
 ## Frontend Commands
 
 Run from `web/ordercore-web`:

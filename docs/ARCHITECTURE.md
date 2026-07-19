@@ -138,7 +138,9 @@ Pay order request
   -> commit transaction
 ```
 
-RabbitMQ is not connected yet. The outbox table is the durable handoff point that future message publishing will read from. Message type names are centralized in `OutboxMessageTypes`; the current order lifecycle constants are `OrderCreated`, `OrderPaid`, and `OrderCancelled`.
+RabbitMQ is not connected yet. The outbox table is the durable handoff point that message publishing reads from. Message type names are centralized in `OutboxMessageTypes`; the current order lifecycle constants are `OrderCreated`, `OrderPaid`, and `OrderCancelled`.
+
+The API hosts an outbox background service. It polls pending or retryable failed messages in batches, publishes them through `IOutboxMessagePublisher`, marks successful messages as `Processed`, and records failed attempts with `RetryCount` and `LastError`. The current publisher logs messages; RabbitMQ can replace this publisher later without changing order payment behavior.
 
 Typical read flow:
 

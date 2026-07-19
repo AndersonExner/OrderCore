@@ -1,5 +1,7 @@
+using OrderCore.Api.BackgroundServices;
 using OrderCore.Application.Customers.Commands;
 using OrderCore.Application.Customers.Queries;
+using OrderCore.Application.Common.Outbox;
 using OrderCore.Application.Products.Commands;
 using OrderCore.Application.Products.Queries;
 using OrderCore.Application.Orders.Commands;
@@ -25,6 +27,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<OutboxProcessingOptions>(
+    builder.Configuration.GetSection(OutboxProcessingOptions.SectionName));
 
 builder.Services.AddInfrastructure(
     builder.Configuration.GetConnectionString("DefaultConnection")!
@@ -44,6 +48,8 @@ builder.Services.AddScoped<PayOrderService>();
 builder.Services.AddScoped<CancelOrderService>();
 builder.Services.AddScoped<GetOrderByIdService>();
 builder.Services.AddScoped<GetOrdersService>();
+builder.Services.AddScoped<OutboxMessageProcessorService>();
+builder.Services.AddHostedService<OutboxBackgroundService>();
 
 
 var app = builder.Build();
