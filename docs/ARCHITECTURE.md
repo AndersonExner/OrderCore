@@ -138,7 +138,7 @@ Pay order request
   -> commit transaction
 ```
 
-RabbitMQ is not connected yet. The outbox table is the durable handoff point that future message publishing will read from.
+RabbitMQ is not connected yet. The outbox table is the durable handoff point that future message publishing will read from. Message type names are centralized in `OutboxMessageTypes`; the current order lifecycle constants are `OrderCreated`, `OrderPaid`, and `OrderCancelled`.
 
 Typical read flow:
 

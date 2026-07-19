@@ -24,6 +24,11 @@ namespace OrderCore.Infrastructure.Persistence.Configurations
 
             builder.Ignore(x => x.TotalAmount);
 
+            builder.HasIndex(x => x.CreatedAtUtc);
+
+            builder.HasIndex(x => new { x.CustomerId, x.CreatedAtUtc })
+                .IsDescending(false, true);
+
             builder.HasMany(x => x.Items)
                 .WithOne()
                 .HasForeignKey(x => x.OrderId)

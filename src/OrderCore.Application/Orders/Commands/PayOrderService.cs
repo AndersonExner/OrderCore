@@ -2,6 +2,7 @@ using System.Text.Json;
 using OrderCore.Application.Abstractions.Persistence;
 using OrderCore.Application.Abstractions.Repositories;
 using OrderCore.Application.Common.Exceptions;
+using OrderCore.Application.Common.Outbox;
 using OrderCore.Application.Orders.Dtos;
 
 namespace OrderCore.Application.Orders.Commands
@@ -52,7 +53,10 @@ namespace OrderCore.Application.Orders.Commands
                     order.TotalAmount,
                     DateTime.UtcNow));
 
-                await _outboxRepository.AddAsync("OrderPaid", outboxPayload, transactionCancellationToken);
+                await _outboxRepository.AddAsync(
+                    OutboxMessageTypes.OrderPaid,
+                    outboxPayload,
+                    transactionCancellationToken);
             }, cancellationToken);
 
             if (order is null)
