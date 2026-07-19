@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
+using OrderCore.Application.Common.Outbox;
 using OrderCore.Infrastructure.Persistence;
 
 namespace OrderCore.IntegrationTests.Orders;
@@ -85,7 +86,7 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var outboxMessage = dbContext.OutboxMessages
-            .Where(x => x.Type == "OrderPaid")
+            .Where(x => x.Type == OutboxMessageTypes.OrderPaid)
             .AsEnumerable()
             .Single(x => x.Payload.Contains(order.Body.Id.ToString()));
 

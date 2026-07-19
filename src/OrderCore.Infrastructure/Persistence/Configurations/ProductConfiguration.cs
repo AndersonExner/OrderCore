@@ -22,6 +22,8 @@ namespace OrderCore.Infrastructure.Persistence.Configurations
 
             builder.Property(x => x.StockQuantity)
                 .IsRequired();
+
+            builder.HasIndex(x => x.Name);
         }
     }
 }

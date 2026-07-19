@@ -3,6 +3,7 @@ using Moq;
 using OrderCore.Application.Abstractions.Persistence;
 using OrderCore.Application.Abstractions.Repositories;
 using OrderCore.Application.Common.Exceptions;
+using OrderCore.Application.Common.Outbox;
 using OrderCore.Application.Orders.Commands;
 using OrderCore.Domain.Entities;
 
@@ -57,7 +58,7 @@ namespace OrderCore.UnitTests.Application
 
             _outboxRepositoryMock.Verify(
                 x => x.AddAsync(
-                    "OrderPaid",
+                    OutboxMessageTypes.OrderPaid,
                     It.Is<string>(payload =>
                         payload.Contains(order.Id.ToString()) &&
                         payload.Contains(order.CustomerId.ToString())),

@@ -33,6 +33,8 @@ namespace OrderCore.Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             builder.HasIndex(x => new { x.Status, x.CreatedAtUtc });
+
+            builder.HasIndex(x => x.Type);
         }
     }
 }
