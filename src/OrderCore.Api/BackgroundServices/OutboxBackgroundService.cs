@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using OrderCore.Api.Logging;
 using OrderCore.Application.Common.Outbox;
 
 namespace OrderCore.Api.BackgroundServices
@@ -54,7 +55,10 @@ namespace OrderCore.Api.BackgroundServices
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error while processing outbox messages.");
+                    _logger.LogError(
+                        ApiLogEvents.OutboxBackgroundProcessingFailed,
+                        ex,
+                        "Unexpected error while processing outbox messages.");
                 }
 
                 try

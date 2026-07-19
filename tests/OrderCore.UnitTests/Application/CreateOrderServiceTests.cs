@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OrderCore.Application.Abstractions.Repositories;
 using OrderCore.Application.Common.Exceptions;
@@ -24,7 +25,8 @@ namespace OrderCore.UnitTests.Application
             _service = new CreateOrderService(
                 _customerRepositoryMock.Object,
                 _productRepositoryMock.Object,
-                _orderRepositoryMock.Object);
+                _orderRepositoryMock.Object,
+                NullLogger<CreateOrderService>.Instance);
         }
 
         [Fact]

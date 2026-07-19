@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OrderCore.Application.Abstractions.Persistence;
 using OrderCore.Application.Abstractions.Repositories;
@@ -32,7 +33,8 @@ namespace OrderCore.UnitTests.Application
             _service = new PayOrderService(
                 _orderRepositoryMock.Object,
                 _outboxRepositoryMock.Object,
-                _unitOfWorkMock.Object);
+                _unitOfWorkMock.Object,
+                NullLogger<PayOrderService>.Instance);
         }
 
         [Fact]

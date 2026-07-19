@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OrderCore.Application.Abstractions.Repositories;
 using OrderCore.Application.Common.Exceptions;
@@ -20,7 +21,8 @@ namespace OrderCore.UnitTests.Application
 
             _service = new CancelOrderService(
                 _orderRepositoryMock.Object,
-                _productRepositoryMock.Object);
+                _productRepositoryMock.Object,
+                NullLogger<CancelOrderService>.Instance);
         }
 
         [Fact]
