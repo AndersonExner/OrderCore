@@ -7,6 +7,7 @@ This document collects the routine commands and expectations for working on Orde
 - .NET SDK compatible with `net10.0`.
 - Node.js and npm for the frontend.
 - PostgreSQL for local persistence.
+- Docker for integration tests that use Testcontainers.
 - EF Core CLI when creating or applying migrations.
 
 ## Backend Commands
@@ -93,7 +94,7 @@ Use integration tests for:
 - serialization and middleware behavior
 - multi-layer scenarios that mocks cannot validate well
 
-The integration test project currently exists but is not yet developed.
+The integration test project uses Testcontainers to start a PostgreSQL container and run the API against a real database. Docker must be running before executing the full solution test suite.
 
 ## Documentation Expectations
 
