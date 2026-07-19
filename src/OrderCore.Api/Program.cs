@@ -6,6 +6,8 @@ using OrderCore.Application.Orders.Commands;
 using OrderCore.Application.Orders.Queries;
 using OrderCore.Infrastructure.DependencyInjection;
 using OrderCore.Api.Extensions;
+using OrderCore.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +47,13 @@ builder.Services.AddScoped<GetOrdersService>();
 
 
 var app = builder.Build();
+
+if (app.Configuration.GetValue<bool>("Database:ApplyMigrations"))
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
