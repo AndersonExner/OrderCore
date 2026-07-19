@@ -123,6 +123,7 @@ Update documentation when a change affects:
 - database schema
 - frontend API assumptions
 - planned versus implemented behavior
+- durable integration behavior such as outbox messages
 
 `AGENTS.md` is the primary instruction file for AI agents. Files in `docs/` are the durable project reference.
 

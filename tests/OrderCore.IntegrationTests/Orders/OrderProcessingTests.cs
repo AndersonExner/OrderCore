@@ -1,14 +1,18 @@
 using System.Net;
 using System.Net.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
+using OrderCore.Infrastructure.Persistence;
 
 namespace OrderCore.IntegrationTests.Orders;
 
 public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
 {
     private readonly HttpClient _client;
+    private readonly OrderCoreApiFactory _factory;
 
     public OrderProcessingTests(OrderCoreApiFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -77,6 +81,17 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(paidOrder);
         Assert.Equal("Paid", paidOrder.Status);
+
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var outboxMessage = dbContext.OutboxMessages
+            .Where(x => x.Type == "OrderPaid")
+            .AsEnumerable()
+            .Single(x => x.Payload.Contains(order.Body.Id.ToString()));
+
+        Assert.Equal(OutboxMessageStatus.Pending, outboxMessage.Status);
+        Assert.Equal(0, outboxMessage.RetryCount);
+        Assert.Null(outboxMessage.ProcessedAtUtc);
     }
 
     [Fact]

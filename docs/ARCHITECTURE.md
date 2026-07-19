@@ -52,6 +52,8 @@ Application services orchestrate domain entities and repositories. They should n
 
 Order processing services coordinate customer lookup, product lookup, stock changes, order status transitions, and repository persistence. Expected business conflicts such as insufficient stock or invalid order status transitions are raised as application exceptions.
 
+Payment also writes an outbox message through an application repository abstraction. This keeps the application layer independent from EF Core while allowing infrastructure to persist integration events in PostgreSQL.
+
 ### `OrderCore.Infrastructure`
 
 Contains EF Core persistence details:
@@ -120,10 +122,23 @@ Payment and cancellation flow:
 Order action request
   -> load order with items
   -> apply domain status transition
+  -> store OrderPaid in outbox when paying
   -> restore product stock when cancelling a pending order
   -> persist changes
   -> return updated order DTO
 ```
+
+Outbox flow:
+
+```text
+Pay order request
+  -> begin PostgreSQL transaction
+  -> mark order as Paid
+  -> save outbox_messages row with Type = OrderPaid and Status = Pending
+  -> commit transaction
+```
+
+RabbitMQ is not connected yet. The outbox table is the durable handoff point that future message publishing will read from.
 
 Typical read flow:
 
