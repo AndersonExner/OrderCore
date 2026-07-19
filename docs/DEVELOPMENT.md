@@ -34,6 +34,22 @@ Swagger is available in development at:
 https://localhost:7171/swagger
 ```
 
+## Docker Compose
+
+Run the full local stack from the repository root:
+
+```powershell
+docker compose up --build
+```
+
+The Compose stack starts:
+
+- PostgreSQL on `localhost:5432`.
+- API on `http://localhost:5282`.
+- Frontend on `http://localhost:5173`.
+
+The API container sets `Database__ApplyMigrations=true`, so EF Core migrations are applied during startup.
+
 ## Frontend Commands
 
 Run from `web/ordercore-web`:

@@ -16,13 +16,30 @@ The system focuses on:
 - PostgreSQL
 - React
 - Vite
+- Docker
 
 ## Planned
 
 - RabbitMQ
 - Redis
-- Docker
 - Azure
+
+## Run With Docker
+
+```powershell
+docker compose up --build
+```
+
+Services:
+
+```text
+Frontend: http://localhost:5173
+API:      http://localhost:5282
+Swagger:  http://localhost:5282/swagger
+Postgres: localhost:5432
+```
+
+The API applies EF Core migrations automatically when running through Docker Compose.
 
 ## Status
 

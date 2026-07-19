@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ordercore-postgres
+    environment:
+      POSTGRES_DB: ordercore
+      POSTGRES_USER: ordercore
+      POSTGRES_PASSWORD: ordercore
+    ports:
+      - "5432:5432"
+    volumes:
+      - ordercore-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ordercore -d ordercore"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: src/OrderCore.Api/Dockerfile
+    container_name: ordercore-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=ordercore;Username=ordercore;Password=ordercore
+      Database__ApplyMigrations: "true"
+    ports:
+      - "5282:8080"
+
+  web:
+    build:
+      context: web/ordercore-web
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:5282
+    container_name: ordercore-web
+    depends_on:
+      - api
+    ports:
+      - "5173:80"
+
+volumes:
+  ordercore-postgres-data:
