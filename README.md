@@ -17,6 +17,7 @@ The system focuses on:
 - React
 - Vite
 - Docker
+- NLog
 
 ## Planned
 
