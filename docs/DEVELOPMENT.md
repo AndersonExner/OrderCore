@@ -76,7 +76,7 @@ $env:ORDERCORE_LOG_NETWORK_ENABLED="true"
 dotnet run --project src\OrderCore.Api\OrderCore.Api.csproj
 ```
 
-The local UDP target sends to `udp4://127.0.0.1:7071`, which matches the default Log2Console local listener setup.
+The local UDP target sends Chainsaw/Log4J XML events to `udp4://127.0.0.1:9998`. In Log2Console, add a UDP receiver/listener for Chainsaw or Log4J XML/NLogViewer-compatible events on port `9998`.
 
 Enable UDP network logging from Docker Compose with:
 
@@ -85,7 +85,7 @@ $env:ORDERCORE_LOG_NETWORK_ENABLED="true"
 docker compose up --build
 ```
 
-Docker Compose sends UDP logs to `udp4://host.docker.internal:7071` by default so the API container can reach Log2Console on the Windows host. Override it with `ORDERCORE_LOG_NETWORK_ADDRESS` if needed.
+Docker Compose sends UDP Chainsaw/Log4J XML events to `udp4://host.docker.internal:9998` by default so the API container can reach Log2Console on the Windows host. Override it with `ORDERCORE_LOG_NETWORK_ADDRESS` if needed.
 
 In Docker Compose, API logs are persisted in the `ordercore-api-logs` volume and network logging is disabled by default.
 

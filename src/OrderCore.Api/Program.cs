@@ -59,15 +59,30 @@ builder.Services.AddHostedService<OutboxBackgroundService>();
 var app = builder.Build();
 app.Lifetime.ApplicationStopped.Register(NLog.LogManager.Shutdown);
 
-if (app.Configuration.GetValue<bool>("Database:ApplyMigrations"))
+var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
+var applyMigrations = app.Configuration.GetValue<bool>("Database:ApplyMigrations");
+var outboxEnabled = app.Configuration.GetValue<bool>($"{OutboxProcessingOptions.SectionName}:Enabled");
+
+startupLogger.LogInformation(
+    "Starting OrderCore API. Environment: {EnvironmentName}, ApplyMigrations: {ApplyMigrations}, OutboxEnabled: {OutboxEnabled}",
+    app.Environment.EnvironmentName,
+    applyMigrations,
+    outboxEnabled);
+
+if (applyMigrations)
 {
+    startupLogger.LogInformation("Applying database migrations.");
+
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await dbContext.Database.MigrateAsync();
+
+    startupLogger.LogInformation("Database migrations applied.");
 }
 
 if (app.Environment.IsDevelopment())
 {
+    startupLogger.LogInformation("Swagger is enabled.");
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -80,6 +95,8 @@ app.UseGlobalExceptionMiddleware();
 
 app.UseAuthorization();
 app.MapControllers();
+
+startupLogger.LogInformation("OrderCore API configured and ready to receive requests.");
 
 app.Run();
 
