@@ -19,6 +19,8 @@ namespace OrderCore.Infrastructure.DependencyInjection
             services.AddScoped<ICustomerRepository, CustomerRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddScoped<IOutboxRepository, OutboxRepository>();
+            services.AddScoped<OrderCore.Application.Abstractions.Persistence.IUnitOfWork, EfUnitOfWork>();
 
             return services;
         }

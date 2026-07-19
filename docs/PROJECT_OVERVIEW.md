@@ -14,6 +14,7 @@ The long-term direction is to grow into a distributed backend system that can de
 - Create orders while decreasing product stock.
 - Pay and cancel pending orders.
 - Cancel pending orders while restoring product stock.
+- Store an `OrderPaid` outbox message when an order is paid.
 - List orders.
 - Find orders by id.
 - Enforce basic domain rules for customer data, product pricing and stock, order items, and order status transitions.
@@ -31,6 +32,8 @@ A product has a name, price, and stock quantity. Products require a non-empty na
 ### Order
 
 An order belongs to a customer and contains order items. Orders start as `Pending`, can be marked as `Paid`, and can be cancelled unless already paid. Creating an order decreases stock for each product in the order. Cancelling a pending order restores the reserved stock.
+
+When an order is paid, the application stores an `OrderPaid` message in the outbox table in the same database transaction as the order status update. A future worker can publish these pending messages to RabbitMQ without losing payment events if the broker is temporarily unavailable.
 
 ### Order Item
 

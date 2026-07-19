@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using OrderCore.Application.Abstractions.Persistence;
 using OrderCore.Application.Abstractions.Repositories;
 using OrderCore.Application.Common.Exceptions;
 using OrderCore.Application.Orders.Commands;
@@ -10,12 +11,27 @@ namespace OrderCore.UnitTests.Application
     public class PayOrderServiceTests
     {
         private readonly Mock<IOrderRepository> _orderRepositoryMock;
+        private readonly Mock<IOutboxRepository> _outboxRepositoryMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly PayOrderService _service;
 
         public PayOrderServiceTests()
         {
             _orderRepositoryMock = new Mock<IOrderRepository>();
-            _service = new PayOrderService(_orderRepositoryMock.Object);
+            _outboxRepositoryMock = new Mock<IOutboxRepository>();
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
+
+            _unitOfWorkMock
+                .Setup(x => x.ExecuteInTransactionAsync(
+                    It.IsAny<Func<CancellationToken, Task>>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns((Func<CancellationToken, Task> action, CancellationToken cancellationToken) =>
+                    action(cancellationToken));
+
+            _service = new PayOrderService(
+                _orderRepositoryMock.Object,
+                _outboxRepositoryMock.Object,
+                _unitOfWorkMock.Object);
         }
 
         [Fact]
@@ -38,6 +54,15 @@ namespace OrderCore.UnitTests.Application
             _orderRepositoryMock.Verify(
                 x => x.UpdateAsync(order, It.IsAny<CancellationToken>()),
                 Times.Once);
+
+            _outboxRepositoryMock.Verify(
+                x => x.AddAsync(
+                    "OrderPaid",
+                    It.Is<string>(payload =>
+                        payload.Contains(order.Id.ToString()) &&
+                        payload.Contains(order.CustomerId.ToString())),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
         [Fact]
@@ -59,6 +84,10 @@ namespace OrderCore.UnitTests.Application
 
             _orderRepositoryMock.Verify(
                 x => x.UpdateAsync(It.IsAny<Order>(), It.IsAny<CancellationToken>()),
+                Times.Never);
+
+            _outboxRepositoryMock.Verify(
+                x => x.AddAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
                 Times.Never);
         }
 
@@ -83,6 +112,10 @@ namespace OrderCore.UnitTests.Application
 
             _orderRepositoryMock.Verify(
                 x => x.UpdateAsync(It.IsAny<Order>(), It.IsAny<CancellationToken>()),
+                Times.Never);
+
+            _outboxRepositoryMock.Verify(
+                x => x.AddAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
                 Times.Never);
         }
     }
