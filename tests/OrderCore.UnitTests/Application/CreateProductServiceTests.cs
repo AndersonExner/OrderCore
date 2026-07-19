@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OrderCore.Application.Abstractions.Repositories;
 using OrderCore.Application.Products.Commands;
@@ -17,7 +18,9 @@ namespace OrderCore.UnitTests.Application
         public CreateProductServiceTests()
         {
             _productRepositoryMock = new Mock<IProductRepository>();
-            _service = new CreateProductService(_productRepositoryMock.Object);
+            _service = new CreateProductService(
+                _productRepositoryMock.Object,
+                NullLogger<CreateProductService>.Instance);
         }
 
         [Fact]

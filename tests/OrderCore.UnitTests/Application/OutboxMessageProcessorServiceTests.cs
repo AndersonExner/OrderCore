@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using OrderCore.Application.Abstractions.Messaging;
 using OrderCore.Application.Abstractions.Repositories;
@@ -19,7 +20,8 @@ namespace OrderCore.UnitTests.Application
 
             _service = new OutboxMessageProcessorService(
                 _outboxRepositoryMock.Object,
-                _outboxMessagePublisherMock.Object);
+                _outboxMessagePublisherMock.Object,
+                NullLogger<OutboxMessageProcessorService>.Instance);
         }
 
         [Fact]

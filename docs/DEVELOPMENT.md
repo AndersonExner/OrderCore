@@ -69,6 +69,16 @@ Default targets:
 - Rolling local files under the API base directory in `logs/`, or `/app/logs` inside the API container.
 - Optional UDP network logging for local tools such as Log2Console.
 
+The default application log layout is:
+
+```text
+OrderCore.Api|timestamp|eventId|level|logger|message exception
+```
+
+Application services emit structured business-operation logs for customer creation, product creation, order creation, order payment, and order cancellation. Business rejections are logged as warnings with stable `EventId` values declared in `ApplicationLogEvents`.
+
+Handled application exceptions are logged by the global exception middleware. Expected exceptions such as validation, business-rule, not-found, and argument errors are logged as warnings; unexpected exceptions are logged as errors with the original exception attached.
+
 Enable UDP network logging locally with:
 
 ```powershell
