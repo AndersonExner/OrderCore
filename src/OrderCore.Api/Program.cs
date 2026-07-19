@@ -10,8 +10,12 @@ using OrderCore.Infrastructure.DependencyInjection;
 using OrderCore.Api.Extensions;
 using OrderCore.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
 builder.Services.AddCors(options =>
 {
@@ -53,6 +57,7 @@ builder.Services.AddHostedService<OutboxBackgroundService>();
 
 
 var app = builder.Build();
+app.Lifetime.ApplicationStopped.Register(NLog.LogManager.Shutdown);
 
 if (app.Configuration.GetValue<bool>("Database:ApplyMigrations"))
 {

@@ -59,6 +59,25 @@ Outbox__BatchSize=20
 Outbox__MaxRetryCount=5
 ```
 
+## Logging
+
+The API uses NLog behind the standard `ILogger<T>` abstractions.
+
+Default targets:
+
+- Console logs for `docker compose logs api`.
+- Rolling local files under the API base directory in `logs/`, or `/app/logs` inside the API container.
+- Optional UDP network logging for local tools such as Log2Console.
+
+Enable UDP network logging locally with:
+
+```powershell
+$env:ORDERCORE_LOG_NETWORK_ENABLED="true"
+dotnet run --project src\OrderCore.Api\OrderCore.Api.csproj
+```
+
+The UDP target sends to `udp4://127.0.0.1:7071`, which matches the default Log2Console local listener setup. In Docker Compose, API logs are persisted in the `ordercore-api-logs` volume and network logging is disabled by default.
+
 ## Frontend Commands
 
 Run from `web/ordercore-web`:

@@ -79,6 +79,8 @@ Contains HTTP concerns:
 
 Controllers should stay thin and delegate behavior to application services.
 
+The API also owns runtime logging configuration. Application code should log through `ILogger<T>`; NLog is registered as the provider at the API boundary and writes to console, rolling files, and an optional local UDP target for Log2Console-style inspection.
+
 ### `ordercore-web`
 
 Contains the browser client:

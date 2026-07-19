@@ -18,5 +18,6 @@ WORKDIR /app
 
 COPY --from=build /app/publish .
 
+RUN mkdir -p /app/logs
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "OrderCore.Api.dll"]

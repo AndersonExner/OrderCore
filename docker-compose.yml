@@ -33,8 +33,11 @@ services:
       Outbox__PollingIntervalSeconds: "10"
       Outbox__BatchSize: "20"
       Outbox__MaxRetryCount: "5"
+      ORDERCORE_LOG_NETWORK_ENABLED: "false"
     ports:
       - "5282:8080"
+    volumes:
+      - ordercore-api-logs:/app/logs
 
   web:
     build:
@@ -50,3 +53,4 @@ services:
 
 volumes:
   ordercore-postgres-data:
+  ordercore-api-logs:
