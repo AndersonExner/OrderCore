@@ -33,7 +33,8 @@ services:
       Outbox__PollingIntervalSeconds: "10"
       Outbox__BatchSize: "20"
       Outbox__MaxRetryCount: "5"
-      ORDERCORE_LOG_NETWORK_ENABLED: "false"
+      ORDERCORE_LOG_NETWORK_ENABLED: ${ORDERCORE_LOG_NETWORK_ENABLED:-false}
+      ORDERCORE_LOG_NETWORK_ADDRESS: ${ORDERCORE_LOG_NETWORK_ADDRESS:-udp4://host.docker.internal:7071}
     ports:
       - "5282:8080"
     volumes:
