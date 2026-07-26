@@ -40,6 +40,18 @@ An order belongs to a customer and contains order items. Orders start as `Pendin
 
 When an order is paid, the application stores an `OrderPaid` message in the outbox table in the same database transaction as the order status update. The API outbox worker processes pending messages, publishes them to RabbitMQ through the infrastructure publisher, and marks them as processed. `OrderCore.Worker` consumes the RabbitMQ message and creates a durable notification that the frontend displays in the header.
 
+The complete payment notification path is:
+
+```text
+Order payment
+  -> PostgreSQL order update
+  -> PostgreSQL outbox message
+  -> RabbitMQ orders.paid event
+  -> OrderCore.Worker notification consumer
+  -> PostgreSQL notifications row
+  -> frontend notification menu
+```
+
 ### Order Item
 
 An order item stores the product id, product name, unit price, and quantity at the time it is added to the order. This preserves the order snapshot even if the product changes later.
@@ -101,6 +113,12 @@ The next planned technologies are:
 
 - Redis
 - Azure
+
+Potential future improvements:
+
+- Replace or complement frontend notification polling with SignalR/WebSocket push notifications.
+- Add a dead-letter queue for messages rejected by RabbitMQ consumers.
+- Persist a richer consumer processing log for support and audit scenarios.
 
 When these are introduced, prefer documenting the runtime flow and operational assumptions in this folder as part of the same change.
 
