@@ -48,6 +48,7 @@ The Compose stack starts:
 - RabbitMQ on `localhost:5672`.
 - RabbitMQ Management on `http://localhost:15672`.
 - API on `http://localhost:5282`.
+- Worker as the `ordercore-worker` container.
 - Frontend on `http://localhost:5173`.
 
 RabbitMQ Management uses `ordercore` / `ordercore` in the local Compose stack.
@@ -67,6 +68,8 @@ RabbitMq__OrderPaidQueueName=ordercore.order-paid
 ```
 
 When a paid order is processed by the outbox worker, the API publishes the message to the durable topic exchange `ordercore.events` with routing key `orders.paid`. The local queue `ordercore.order-paid` is declared and bound automatically when `RabbitMq:DeclareTopology=true`.
+
+The `ordercore-worker` container consumes `ordercore.order-paid`, creates a durable notification in PostgreSQL, and acknowledges the RabbitMQ message. The frontend header polls `/api/notifications` and shows unread payment notifications.
 
 To run the API without RabbitMQ, keep `Messaging:OutboxPublisher` as `Logging`; this is the default in `appsettings.json`. Docker Compose overrides it to `RabbitMq`.
 
@@ -128,6 +131,16 @@ http://localhost:5173
 ```
 
 The API CORS policy currently allows this frontend origin.
+
+## Notification Flow Test
+
+With Docker Compose running:
+
+1. Create a customer, product, and order through Swagger or the frontend.
+2. Pay the order.
+3. Confirm the outbox message becomes `Processed` in PostgreSQL.
+4. Confirm the RabbitMQ queue `ordercore.order-paid` no longer has a ready message after the worker consumes it.
+5. Confirm the frontend header shows an unread payment notification.
 
 ## Database and Migrations
 

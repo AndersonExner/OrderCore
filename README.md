@@ -12,6 +12,7 @@ The system focuses on:
 
 - .NET 10
 - ASP.NET Core
+- .NET Worker Service
 - Entity Framework Core
 - PostgreSQL
 - RabbitMQ
@@ -37,6 +38,7 @@ Services:
 Frontend: http://localhost:5173
 API:      http://localhost:5282
 Swagger:  http://localhost:5282/swagger
+Worker:   ordercore-worker container
 Postgres: localhost:5432
 RabbitMQ: localhost:5672
 RabbitMQ Management: http://localhost:15672

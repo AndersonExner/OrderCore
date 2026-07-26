@@ -1,4 +1,5 @@
 import { Link, Outlet } from "react-router-dom";
+import NotificationsMenu from "./NotificationsMenu";
 
 const navLinkStyle: React.CSSProperties = {
   color: "white",
@@ -21,20 +22,24 @@ export default function Layout() {
       >
         <h1 style={{ margin: 0, fontSize: "20px" }}>OrderCore</h1>
 
-        <nav style={{ display: "flex", gap: "16px" }}>
-          <Link to="/" style={navLinkStyle}>Home</Link>
-          <Link to="/customers" style={navLinkStyle}>Customers</Link>
-          <Link to="/products" style={navLinkStyle}>Products</Link>
-          <Link to="/orders" style={navLinkStyle}>Orders</Link>
-          <a
-            href="https://localhost:7171/swagger"
-            target="_blank"
-            rel="noreferrer"
-            style={navLinkStyle}
-          >
-            Swagger
-          </a>
-        </nav>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <nav style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+            <Link to="/" style={navLinkStyle}>Home</Link>
+            <Link to="/customers" style={navLinkStyle}>Customers</Link>
+            <Link to="/products" style={navLinkStyle}>Products</Link>
+            <Link to="/orders" style={navLinkStyle}>Orders</Link>
+            <a
+              href="https://localhost:7171/swagger"
+              target="_blank"
+              rel="noreferrer"
+              style={navLinkStyle}
+            >
+              Swagger
+            </a>
+          </nav>
+
+          <NotificationsMenu />
+        </div>
       </header>
 
       <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px" }}>

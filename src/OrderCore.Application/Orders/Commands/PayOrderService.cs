@@ -6,6 +6,7 @@ using OrderCore.Application.Common.Exceptions;
 using OrderCore.Application.Common.Logging;
 using OrderCore.Application.Common.Outbox;
 using OrderCore.Application.Orders.Dtos;
+using OrderCore.Contracts.Events;
 
 namespace OrderCore.Application.Orders.Commands
 {
@@ -71,7 +72,7 @@ namespace OrderCore.Application.Orders.Commands
 
                 await _orderRepository.UpdateAsync(order, transactionCancellationToken);
 
-                var outboxPayload = JsonSerializer.Serialize(new OrderPaidEvent(
+                var outboxPayload = JsonSerializer.Serialize(new OrderPaidIntegrationEvent(
                     order.Id,
                     order.CustomerId,
                     order.TotalAmount,
@@ -119,10 +120,5 @@ namespace OrderCore.Application.Orders.Commands
             };
         }
 
-        private sealed record OrderPaidEvent(
-            Guid OrderId,
-            Guid CustomerId,
-            decimal TotalAmount,
-            DateTime PaidAtUtc);
     }
 }

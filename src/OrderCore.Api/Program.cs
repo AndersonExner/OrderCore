@@ -2,6 +2,8 @@ using OrderCore.Api.BackgroundServices;
 using OrderCore.Application.Customers.Commands;
 using OrderCore.Application.Customers.Queries;
 using OrderCore.Application.Common.Outbox;
+using OrderCore.Application.Notifications.Commands;
+using OrderCore.Application.Notifications.Queries;
 using OrderCore.Application.Products.Commands;
 using OrderCore.Application.Products.Queries;
 using OrderCore.Application.Orders.Commands;
@@ -60,6 +62,11 @@ builder.Services.AddScoped<CancelOrderService>();
 builder.Services.AddScoped<GetOrderByIdService>();
 builder.Services.AddScoped<GetOrdersService>();
 builder.Services.AddScoped<OutboxMessageProcessorService>();
+
+builder.Services.AddScoped<CreateOrderPaidNotificationService>();
+builder.Services.AddScoped<GetNotificationsService>();
+builder.Services.AddScoped<MarkNotificationAsReadService>();
+
 builder.Services.AddHostedService<OutboxBackgroundService>();
 
 

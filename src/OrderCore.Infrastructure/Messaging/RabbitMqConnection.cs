@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using System.Reflection;
 
 namespace OrderCore.Infrastructure.Messaging
 {
@@ -43,13 +44,17 @@ namespace OrderCore.Infrastructure.Messaging
                     Password = _options.Password,
                     VirtualHost = _options.VirtualHost,
                     AutomaticRecoveryEnabled = true,
-                    TopologyRecoveryEnabled = true
+                    TopologyRecoveryEnabled = true,
+                    DispatchConsumersAsync = true
                 };
 
-                _connection = factory.CreateConnection("OrderCore.Api");
+                var connectionName = Assembly.GetEntryAssembly()?.GetName().Name ?? "OrderCore";
+
+                _connection = factory.CreateConnection(connectionName);
 
                 _logger.LogInformation(
-                    "RabbitMQ connection opened. Host: {RabbitMqHost}, Port: {RabbitMqPort}, VirtualHost: {RabbitMqVirtualHost}",
+                    "RabbitMQ connection opened. ConnectionName: {RabbitMqConnectionName}, Host: {RabbitMqHost}, Port: {RabbitMqPort}, VirtualHost: {RabbitMqVirtualHost}",
+                    connectionName,
                     _options.HostName,
                     _options.Port,
                     _options.VirtualHost);

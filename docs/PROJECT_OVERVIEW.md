@@ -17,6 +17,9 @@ The long-term direction is to grow into a distributed backend system that can de
 - Store an `OrderPaid` outbox message when an order is paid.
 - Process pending outbox messages with a background worker.
 - Publish processed outbox events to RabbitMQ when running through Docker Compose.
+- Consume `OrderPaid` events with a separate worker.
+- Create durable payment notifications for the frontend.
+- List and mark notifications as read.
 - List orders.
 - Find orders by id.
 - Enforce basic domain rules for customer data, product pricing and stock, order items, and order status transitions.
@@ -35,7 +38,7 @@ A product has a name, price, and stock quantity. Products require a non-empty na
 
 An order belongs to a customer and contains order items. Orders start as `Pending`, can be marked as `Paid`, and can be cancelled unless already paid. Creating an order decreases stock for each product in the order. Cancelling a pending order restores the reserved stock.
 
-When an order is paid, the application stores an `OrderPaid` message in the outbox table in the same database transaction as the order status update. A background worker processes pending messages, publishes them to RabbitMQ through the infrastructure publisher, and marks them as processed.
+When an order is paid, the application stores an `OrderPaid` message in the outbox table in the same database transaction as the order status update. The API outbox worker processes pending messages, publishes them to RabbitMQ through the infrastructure publisher, and marks them as processed. `OrderCore.Worker` consumes the RabbitMQ message and creates a durable notification that the frontend displays in the header.
 
 ### Order Item
 
@@ -66,6 +69,9 @@ GET  /api/orders
 GET  /api/orders/{id}
 POST /api/orders/{id}/pay
 POST /api/orders/{id}/cancel
+
+GET  /api/notifications?unreadOnly={true-or-false}&limit={count}
+POST /api/notifications/{id}/read
 ```
 
 Swagger is enabled in development and opens under:
@@ -87,7 +93,7 @@ Current routes:
 /orders
 ```
 
-The frontend calls the API through helpers in `web/ordercore-web/src/api`, with the base URL defined in `web/ordercore-web/src/api/http.ts`.
+The frontend calls the API through helpers in `web/ordercore-web/src/api`, with the base URL defined in `web/ordercore-web/src/api/http.ts`. The shared layout includes a notification menu that polls recent notifications and highlights unread payment confirmations.
 
 ## Planned Evolution
 

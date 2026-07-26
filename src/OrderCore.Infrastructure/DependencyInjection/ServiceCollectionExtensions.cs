@@ -24,6 +24,7 @@ namespace OrderCore.Infrastructure.DependencyInjection
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<IOutboxRepository, OutboxRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 
             if (string.Equals(outboxPublisher, OutboxPublisherTypes.RabbitMq, StringComparison.OrdinalIgnoreCase))
