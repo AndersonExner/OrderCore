@@ -81,105 +81,49 @@ export default function NotificationsMenu() {
   }
 
   return (
-    <div style={{ position: "relative" }}>
+    <div className="notification-root">
       <button
         type="button"
         onClick={() => setIsOpen((current) => !current)}
-        style={{
-          background: unreadCount > 0 ? "#2563eb" : "#374151",
-          color: "white",
-          border: "1px solid rgba(255,255,255,0.25)",
-          borderRadius: "8px",
-          padding: "8px 10px",
-          cursor: "pointer",
-          minWidth: "118px",
-          height: "36px",
-        }}
+        className={`button compact notification-button${unreadCount > 0 ? " has-unread" : ""}`}
       >
         Notifications {unreadCount > 0 ? `(${unreadCount})` : ""}
       </button>
 
       {toast && (
-        <div
-          role="status"
-          style={{
-            position: "absolute",
-            top: "48px",
-            right: 0,
-            width: "320px",
-            background: "#ecfdf5",
-            color: "#064e3b",
-            border: "1px solid #a7f3d0",
-            borderRadius: "8px",
-            boxShadow: "0 10px 24px rgba(0,0,0,0.16)",
-            padding: "12px",
-            zIndex: 20,
-          }}
-        >
+        <div role="status" className="notification-toast">
           <strong style={{ display: "block", marginBottom: "4px" }}>{toast.title}</strong>
           <span>{toast.message}</span>
         </div>
       )}
 
       {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "44px",
-            right: 0,
-            width: "360px",
-            background: "white",
-            color: "#111827",
-            border: "1px solid #e5e7eb",
-            borderRadius: "8px",
-            boxShadow: "0 16px 32px rgba(0,0,0,0.18)",
-            zIndex: 30,
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "12px",
-              borderBottom: "1px solid #e5e7eb",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+        <div className="notification-popover">
+          <div className="panel-header">
             <strong>Recent notifications</strong>
             <button
               type="button"
               onClick={() => void loadNotifications()}
-              style={{
-                border: "1px solid #d1d5db",
-                background: "white",
-                borderRadius: "6px",
-                cursor: "pointer",
-                padding: "6px 8px",
-              }}
+              className="button secondary compact"
             >
               Refresh
             </button>
           </div>
 
           {error && (
-            <div style={{ padding: "12px", color: "#991b1b", background: "#fee2e2" }}>
+            <div className="feedback error" style={{ borderRadius: 0 }}>
               {error}
             </div>
           )}
 
           {notifications.length === 0 ? (
-            <div style={{ padding: "14px", color: "#6b7280" }}>No notifications yet.</div>
+            <div className="empty-state">No notifications yet.</div>
           ) : (
             <div style={{ maxHeight: "360px", overflowY: "auto" }}>
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  style={{
-                    padding: "12px",
-                    borderBottom: "1px solid #f3f4f6",
-                    background: notification.isRead ? "white" : "#eff6ff",
-                  }}
+                  className={`notification-item${notification.isRead ? "" : " unread"}`}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
                     <strong style={{ fontSize: "14px" }}>{notification.title}</strong>
@@ -194,14 +138,7 @@ export default function NotificationsMenu() {
                     <button
                       type="button"
                       onClick={() => void handleMarkAsRead(notification.id)}
-                      style={{
-                        border: "none",
-                        background: "#2563eb",
-                        color: "white",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        padding: "6px 8px",
-                      }}
+                      className="button primary compact"
                     >
                       Mark as read
                     </button>

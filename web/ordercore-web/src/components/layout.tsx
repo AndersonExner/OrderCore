@@ -1,48 +1,58 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import NotificationsMenu from "./NotificationsMenu";
-
-const navLinkStyle: React.CSSProperties = {
-  color: "white",
-  textDecoration: "none",
-  fontWeight: 500,
-};
 
 export default function Layout() {
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", minHeight: "100vh", background: "#f5f7fb" }}>
-      <header
-        style={{
-          background: "#111827",
-          color: "white",
-          padding: "16px 24px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: "20px" }}>OrderCore</h1>
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <Link to="/" className="brand-link" aria-label="OrderCore dashboard">
+            <span className="brand-mark">OC</span>
+            <span>
+              <span className="brand-name">OrderCore</span>
+              <span className="brand-subtitle">Order operations</span>
+            </span>
+          </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <nav style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-            <Link to="/" style={navLinkStyle}>Home</Link>
-            <Link to="/customers" style={navLinkStyle}>Customers</Link>
-            <Link to="/products" style={navLinkStyle}>Products</Link>
-            <Link to="/orders" style={navLinkStyle}>Orders</Link>
-            <a
-              href="https://localhost:7171/swagger"
-              target="_blank"
-              rel="noreferrer"
-              style={navLinkStyle}
-            >
-              Swagger
-            </a>
-          </nav>
+          <div className="app-header-actions">
+            <nav className="app-nav" aria-label="Main navigation">
+              <NavLink to="/" end className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}>
+                Home
+              </NavLink>
+              <NavLink
+                to="/customers"
+                className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
+              >
+                Customers
+              </NavLink>
+              <NavLink
+                to="/products"
+                className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
+              >
+                Products
+              </NavLink>
+              <NavLink
+                to="/orders"
+                className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
+              >
+                Orders
+              </NavLink>
+              <a
+                href="https://localhost:7171/swagger"
+                target="_blank"
+                rel="noreferrer"
+                className="nav-link"
+              >
+                Swagger
+              </a>
+            </nav>
 
-          <NotificationsMenu />
+            <NotificationsMenu />
+          </div>
         </div>
       </header>
 
-      <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px" }}>
+      <main className="app-main">
         <Outlet />
       </main>
     </div>
