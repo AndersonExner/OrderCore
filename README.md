@@ -8,6 +8,12 @@ The system focuses on:
 - resiliency
 - clean architecture principles
 
+Current event flow:
+
+```text
+OrderCore.Api -> PostgreSQL outbox -> RabbitMQ -> OrderCore.Worker -> notifications -> React frontend
+```
+
 ## Current Tech Stack
 
 - .NET 10
@@ -55,5 +61,5 @@ RabbitMQ Management uses `ordercore` / `ordercore` in the local Compose stack.
 
 - [AI agent instructions](AGENTS.md)
 - [Project overview](docs/PROJECT_OVERVIEW.md)
-- [Architecture](docs/ARCHITECTURE.md)
+- [Architecture and event flow](docs/ARCHITECTURE.md)
 - [Development guide](docs/DEVELOPMENT.md)

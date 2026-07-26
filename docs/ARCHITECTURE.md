@@ -115,6 +115,38 @@ HTTP request
   -> HTTP response
 ```
 
+## Event-Driven Payment Notification Flow
+
+The payment notification flow demonstrates the distributed part of OrderCore. The payment request remains transactional and fast, while notification delivery happens asynchronously through the outbox table, RabbitMQ, and a separate worker process.
+
+```mermaid
+flowchart LR
+    Frontend["React frontend"] -->|POST /api/orders/{id}/pay| Api["OrderCore.Api"]
+    Api -->|mark order Paid| Orders[("PostgreSQL orders")]
+    Api -->|insert OrderPaid Pending| Outbox[("PostgreSQL outbox_messages")]
+    OutboxWorker["API outbox background service"] -->|poll pending messages| Outbox
+    OutboxWorker -->|publish orders.paid| Rabbit["RabbitMQ exchange ordercore.events"]
+    Rabbit -->|route orders.paid| Queue["Queue ordercore.order-paid"]
+    Worker["OrderCore.Worker"] -->|consume and ACK| Queue
+    Worker -->|insert payment notification| Notifications[("PostgreSQL notifications")]
+    Frontend -->|poll GET /api/notifications| Api
+    Api -->|read recent notifications| Notifications
+    Api -->|notification DTOs| Frontend
+```
+
+Component responsibilities:
+
+| Component | Responsibility |
+| --- | --- |
+| `OrderCore.Api` | Handles HTTP requests, applies domain use cases, stores outbox messages, exposes notification endpoints, and hosts the outbox publisher background service. |
+| `outbox_messages` | Durable handoff between the payment transaction and external message publishing. |
+| RabbitMQ | Transports published integration events to independent consumers. |
+| `OrderCore.Worker` | Consumes `OrderPaid`, validates the event, creates durable notifications, and ACKs only after successful processing. |
+| `notifications` | Durable read model for frontend payment confirmations. |
+| `ordercore-web` | Polls notification endpoints, displays unread counts, and allows marking notifications as read. |
+
+This flow intentionally uses frontend polling for the first implementation. A future improvement is to add SignalR or WebSocket push notifications so the API can notify connected clients immediately after a notification is created, while keeping polling as a fallback.
+
 Order processing flow:
 
 ```text
