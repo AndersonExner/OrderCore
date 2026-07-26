@@ -1,12 +1,37 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
-import {
-  createProduct,
-  getProducts,
-} from "../api/products";
-
+import Modal from "../components/Modal";
+import { createProduct, getProducts } from "../api/products";
 import type { ProductResponse } from "../api/products";
+
+type Feedback = {
+  type: "success" | "error";
+  text: string;
+};
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
+}
+
+function getStockClass(stockQuantity: number) {
+  if (stockQuantity <= 5) {
+    return "low";
+  }
+
+  return "healthy";
+}
+
+function getStockLabel(stockQuantity: number) {
+  if (stockQuantity <= 5) {
+    return "Low stock";
+  }
+
+  return "Available";
+}
 
 export default function ProductsPage() {
   const [name, setName] = useState("");
@@ -14,27 +39,58 @@ export default function ProductsPage() {
   const [stockQuantity, setStockQuantity] = useState("");
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
-  async function loadProducts() {
+  const inventoryValue = useMemo(
+    () =>
+      products.reduce(
+        (total, product) => total + product.price * product.stockQuantity,
+        0
+      ),
+    [products]
+  );
+
+  const lowStockCount = useMemo(
+    () => products.filter((product) => product.stockQuantity <= 5).length,
+    [products]
+  );
+
+  const averagePrice = useMemo(() => {
+    if (products.length === 0) {
+      return 0;
+    }
+
+    return products.reduce((total, product) => total + product.price, 0) / products.length;
+  }, [products]);
+
+  const unitsInStock = useMemo(
+    () => products.reduce((total, product) => total + product.stockQuantity, 0),
+    [products]
+  );
+
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const result = await getProducts();
       setProducts(result);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to load products.");
+      setFeedback({
+        type: "error",
+        text: error instanceof Error ? error.message : "Failed to load products.",
+      });
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     void loadProducts();
-  }, []);
+  }, [loadProducts]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    setMessage("");
+    setFeedback(null);
 
     try {
       await createProduct({
@@ -46,107 +102,183 @@ export default function ProductsPage() {
       setName("");
       setPrice("");
       setStockQuantity("");
-      setMessage("Product created successfully.");
+      setIsCreateModalOpen(false);
+      setFeedback({ type: "success", text: "Product created successfully." });
       await loadProducts();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to create product.");
+      setFeedback({
+        type: "error",
+        text: error instanceof Error ? error.message : "Failed to create product.",
+      });
     }
   }
 
   return (
-    <div>
-      <h2>Products</h2>
+    <div className="page-shell">
+      <header className="page-header">
+        <div>
+          <p className="page-kicker">Catalog</p>
+          <h1 className="page-title">Products</h1>
+        </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          background: "white",
-          padding: "20px",
-          borderRadius: "12px",
-          boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
-          marginBottom: "24px",
-          display: "grid",
-          gap: "12px",
-          maxWidth: "500px",
-        }}
-      >
-        <input
-          placeholder="Product name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          style={{ padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db" }}
-        />
-
-        <input
-          placeholder="Price"
-          type="number"
-          step="0.01"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          style={{ padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db" }}
-        />
-
-        <input
-          placeholder="Stock quantity"
-          type="number"
-          value={stockQuantity}
-          onChange={(e) => setStockQuantity(e.target.value)}
-          style={{ padding: "10px", borderRadius: "8px", border: "1px solid #d1d5db" }}
-        />
-
-        <button
-          type="submit"
-          style={{
-            padding: "10px 14px",
-            borderRadius: "8px",
-            border: "none",
-            background: "#111827",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Create product
-        </button>
-      </form>
-
-      {message && <p>{message}</p>}
-
-      <div>
-        <h3>Product list</h3>
-        {loading ? (
-          <p>Loading...</p>
-        ) : products.length === 0 ? (
-          <p>No products found.</p>
-        ) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              background: "white",
-              borderRadius: "12px",
-              overflow: "hidden",
-              boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+        <div className="button-row">
+          <button
+            type="button"
+            onClick={() => {
+              setFeedback(null);
+              void loadProducts();
             }}
+            className="button secondary"
           >
-            <thead>
-              <tr style={{ background: "#e5e7eb" }}>
-                <th style={{ textAlign: "left", padding: "12px" }}>Name</th>
-                <th style={{ textAlign: "left", padding: "12px" }}>Price</th>
-                <th style={{ textAlign: "left", padding: "12px" }}>Stock</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product.id}>
-                  <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>{product.name}</td>
-                  <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>{product.price}</td>
-                  <td style={{ padding: "12px", borderTop: "1px solid #e5e7eb" }}>{product.stockQuantity}</td>
+            Refresh data
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="button primary"
+          >
+            New product
+          </button>
+        </div>
+      </header>
+
+      <section className="grid stats">
+        <div className="panel stat-card">
+          <span className="stat-label">Total products</span>
+          <strong className="stat-value">{products.length}</strong>
+        </div>
+        <div className="panel stat-card">
+          <span className="stat-label">Inventory value</span>
+          <strong className="stat-value">{formatCurrency(inventoryValue)}</strong>
+        </div>
+        <div className="panel stat-card">
+          <span className="stat-label">Low stock</span>
+          <strong className="stat-value">{lowStockCount}</strong>
+        </div>
+      </section>
+
+      {feedback && (
+        <div className={`feedback ${feedback.type}`} role="status">
+          {feedback.text}
+        </div>
+      )}
+
+      <section className="panel panel-pad">
+        <h2 className="panel-title">Catalog snapshot</h2>
+        <div style={{ marginTop: "10px" }}>
+          <div className="home-signal">
+            <span className="muted">Average price</span>
+            <strong>{formatCurrency(averagePrice)}</strong>
+          </div>
+          <div className="home-signal">
+            <span className="muted">Units in stock</span>
+            <strong>{unitsInStock}</strong>
+          </div>
+          <div className="home-signal">
+            <span className="muted">Health</span>
+            <span className={`status-pill ${lowStockCount > 0 ? "low" : "healthy"}`}>
+              {lowStockCount > 0 ? "Needs attention" : "Balanced"}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <h2 className="panel-title">Product list</h2>
+            {loading && <span className="muted">Loading...</span>}
+          </div>
+        </div>
+
+        {products.length === 0 ? (
+          <div className="empty-state">No products found.</div>
+        ) : (
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th className="numeric">Price</th>
+                  <th className="numeric">Stock</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {products.map((product) => (
+                  <tr key={product.id}>
+                    <td>
+                      <strong className="entity-name">{product.name}</strong>
+                      <span className="entity-id">{product.id}</span>
+                    </td>
+                    <td className="numeric">{formatCurrency(product.price)}</td>
+                    <td className="numeric">{product.stockQuantity}</td>
+                    <td>
+                      <span className={`status-pill ${getStockClass(product.stockQuantity)}`}>
+                        {getStockLabel(product.stockQuantity)}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
+      </section>
+
+      <Modal
+        title="New product"
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      >
+        <form onSubmit={handleSubmit} className="form-grid">
+          <label className="field-label">
+            Name
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              className="field"
+              autoFocus
+            />
+          </label>
+
+          <label className="field-label">
+            Price
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={price}
+              onChange={(event) => setPrice(event.target.value)}
+              className="field"
+            />
+          </label>
+
+          <label className="field-label">
+            Stock quantity
+            <input
+              type="number"
+              min="0"
+              value={stockQuantity}
+              onChange={(event) => setStockQuantity(event.target.value)}
+              className="field"
+            />
+          </label>
+
+          <div className="button-row">
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(false)}
+              className="button secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="button primary">
+              Create product
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
