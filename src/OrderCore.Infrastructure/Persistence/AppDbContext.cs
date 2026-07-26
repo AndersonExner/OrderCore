@@ -10,6 +10,7 @@ namespace OrderCore.Infrastructure.Persistence
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderItem> OrderItems => Set<OrderItem>();
         public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+        public DbSet<Notification> Notifications => Set<Notification>();
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {

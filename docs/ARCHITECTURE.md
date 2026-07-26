@@ -8,6 +8,9 @@ OrderCore follows a layered architecture with a clean separation between domain 
 OrderCore.Api
   depends on Application and Infrastructure
 
+OrderCore.Worker
+  depends on Application, Contracts, and Infrastructure
+
 OrderCore.Application
   depends on Domain and Contracts
 
@@ -81,6 +84,12 @@ Controllers should stay thin and delegate behavior to application services.
 
 The API also owns runtime logging configuration. Application code should log through `ILogger<T>`; NLog is registered as the provider at the API boundary and writes to console, rolling files, and an optional local UDP target for Log2Console-style inspection.
 
+### `OrderCore.Worker`
+
+Contains background consumers that react to integration events outside the HTTP request path.
+
+The current worker consumes `OrderPaid` messages from RabbitMQ, creates durable notifications in PostgreSQL, and acknowledges messages only after processing succeeds. Invalid messages are rejected without requeue; transient processing failures are negatively acknowledged with requeue.
+
 ### `ordercore-web`
 
 Contains the browser client:
@@ -148,6 +157,20 @@ The outbox table is the durable handoff point that message publishing reads from
 The API hosts an outbox background service. It polls pending or retryable failed messages in batches, publishes them through `IOutboxMessagePublisher`, marks successful messages as `Processed`, and records failed attempts with `RetryCount` and `LastError`.
 
 Infrastructure can use either the logging publisher or the RabbitMQ publisher. Docker Compose uses RabbitMQ and publishes to the durable topic exchange `ordercore.events`; `OrderPaid` messages use routing key `orders.paid` and are bound to the local queue `ordercore.order-paid`.
+
+Notification consumer flow:
+
+```text
+RabbitMQ ordercore.order-paid
+  -> OrderCore.Worker consumes OrderPaid
+  -> validate and deserialize event contract
+  -> create notifications row with SourceMessageId = RabbitMQ MessageId
+  -> ACK RabbitMQ message
+  -> frontend polls /api/notifications
+  -> header notification menu displays the payment confirmation
+```
+
+`SourceMessageId` is unique in the notifications table. This makes consumer processing idempotent when RabbitMQ redelivers a message after a worker restart or transient failure.
 
 Typical read flow:
 

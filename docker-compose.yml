@@ -69,6 +69,30 @@ services:
     volumes:
       - ordercore-api-logs:/app/logs
 
+  worker:
+    build:
+      context: .
+      dockerfile: src/OrderCore.Worker/Dockerfile
+    container_name: ordercore-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=ordercore;Username=ordercore;Password=ordercore
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: "5672"
+      RabbitMq__UserName: ordercore
+      RabbitMq__Password: ordercore
+      RabbitMq__VirtualHost: /
+      RabbitMq__ExchangeName: ordercore.events
+      RabbitMq__ExchangeType: topic
+      RabbitMq__OrderPaidQueueName: ordercore.order-paid
+      RabbitMq__DeclareTopology: "true"
+
   web:
     build:
       context: web/ordercore-web
