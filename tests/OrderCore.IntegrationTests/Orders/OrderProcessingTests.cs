@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using OrderCore.Application.Common.Outbox;
@@ -21,6 +22,8 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
     public async Task Should_Create_Order_And_Decrease_Product_Stock()
     {
         // Arrange
+        await AuthenticateAsRoleAsync("Admin");
+
         var customer = await CreateCustomerAsync();
         var product = await CreateProductAsync(stockQuantity: 10);
 
@@ -40,6 +43,8 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
     public async Task Should_Return_Conflict_When_Product_Has_Insufficient_Stock()
     {
         // Arrange
+        await AuthenticateAsRoleAsync("Admin");
+
         var customer = await CreateCustomerAsync();
         var product = await CreateProductAsync(stockQuantity: 1);
 
@@ -68,6 +73,8 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
     public async Task Should_Mark_Order_As_Paid()
     {
         // Arrange
+        await AuthenticateAsRoleAsync("Admin");
+
         var customer = await CreateCustomerAsync();
         var product = await CreateProductAsync(stockQuantity: 10);
         var order = await CreateOrderAsync(customer.Id, product.Id, quantity: 2);
@@ -99,6 +106,8 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
     public async Task Should_Process_Pending_Outbox_Message()
     {
         // Arrange
+        await AuthenticateAsRoleAsync("Admin");
+
         var customer = await CreateCustomerAsync();
         var product = await CreateProductAsync(stockQuantity: 10);
         var order = await CreateOrderAsync(customer.Id, product.Id, quantity: 2);
@@ -129,6 +138,8 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
     public async Task Should_Cancel_Pending_Order_And_Restore_Product_Stock()
     {
         // Arrange
+        await AuthenticateAsRoleAsync("Admin");
+
         var customer = await CreateCustomerAsync();
         var product = await CreateProductAsync(stockQuantity: 10);
         var order = await CreateOrderAsync(customer.Id, product.Id, quantity: 2);
@@ -151,6 +162,8 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
     public async Task Should_Return_Conflict_When_Cancelling_Paid_Order()
     {
         // Arrange
+        await AuthenticateAsRoleAsync("Admin");
+
         var customer = await CreateCustomerAsync();
         var product = await CreateProductAsync(stockQuantity: 10);
         var order = await CreateOrderAsync(customer.Id, product.Id, quantity: 2);
@@ -167,6 +180,57 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
         // Assert
         Assert.Equal(HttpStatusCode.Conflict, cancelResponse.StatusCode);
         Assert.Equal(8, updatedProduct.StockQuantity);
+    }
+
+    [Fact]
+    public async Task Should_Require_Authentication_For_Product_List()
+    {
+        // Arrange
+        _client.DefaultRequestHeaders.Authorization = null;
+
+        // Act
+        var response = await _client.GetAsync("/api/products");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Should_Return_Forbidden_When_Sales_User_Creates_Product()
+    {
+        // Arrange
+        await AuthenticateAsRoleAsync("Sales");
+
+        // Act
+        var response = await _client.PostAsJsonAsync("/api/products", new
+        {
+            name = $"Notebook {Guid.NewGuid():N}",
+            price = 4500m,
+            stockQuantity = 10
+        });
+
+        // Assert
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    private async Task AuthenticateAsRoleAsync(string role)
+    {
+        var response = await _client.PostAsJsonAsync("/api/auth/register", new
+        {
+            userName = $"{role.ToLowerInvariant()}-{Guid.NewGuid():N}",
+            email = $"{role.ToLowerInvariant()}-{Guid.NewGuid():N}@email.com",
+            password = "Admin123!",
+            role
+        });
+
+        response.EnsureSuccessStatusCode();
+
+        var auth = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        Assert.NotNull(auth);
+        Assert.False(string.IsNullOrWhiteSpace(auth.AccessToken));
+
+        _client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", auth.AccessToken);
     }
 
     private async Task<CustomerResponse> CreateCustomerAsync()
@@ -224,6 +288,8 @@ public class OrderProcessingTests : IClassFixture<OrderCoreApiFactory>
     }
 
     private sealed record ApiResponse<T>(HttpStatusCode StatusCode, T? Body);
+
+    private sealed record AuthResponse(string AccessToken);
 
     private sealed record CustomerResponse(Guid Id);
 

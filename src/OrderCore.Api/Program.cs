@@ -1,4 +1,7 @@
 using OrderCore.Api.BackgroundServices;
+using OrderCore.Api.Security;
+using OrderCore.Application.Abstractions.Security;
+using OrderCore.Application.Auth.Commands;
 using OrderCore.Application.Customers.Commands;
 using OrderCore.Application.Customers.Queries;
 using OrderCore.Application.Common.Outbox;
@@ -12,8 +15,12 @@ using OrderCore.Infrastructure.DependencyInjection;
 using OrderCore.Infrastructure.Messaging;
 using OrderCore.Api.Extensions;
 using OrderCore.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using NLog.Web;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,11 +40,56 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter a valid JWT access token."
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("Bearer", document, null)] = new List<string>()
+    });
+});
 builder.Services.Configure<OutboxProcessingOptions>(
     builder.Configuration.GetSection(OutboxProcessingOptions.SectionName));
 builder.Services.Configure<RabbitMqOptions>(
     builder.Configuration.GetSection(RabbitMqOptions.SectionName));
+builder.Services.Configure<JwtOptions>(
+    builder.Configuration.GetSection(JwtOptions.SectionName));
+
+var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+    ?? new JwtOptions();
+
+if (Encoding.UTF8.GetByteCount(jwtOptions.SigningKey) < 32)
+{
+    throw new InvalidOperationException("Jwt:SigningKey must contain at least 32 bytes.");
+}
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    });
+
+builder.Services.AddAuthorization(AuthPolicies.AddOrderCorePolicies);
 
 var outboxPublisher = builder.Configuration.GetValue<string>("Messaging:OutboxPublisher")
     ?? OutboxPublisherTypes.Logging;
@@ -66,6 +118,9 @@ builder.Services.AddScoped<OutboxMessageProcessorService>();
 builder.Services.AddScoped<CreateOrderPaidNotificationService>();
 builder.Services.AddScoped<GetNotificationsService>();
 builder.Services.AddScoped<MarkNotificationAsReadService>();
+builder.Services.AddScoped<RegisterUserService>();
+builder.Services.AddScoped<LoginService>();
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
 builder.Services.AddHostedService<OutboxBackgroundService>();
 
@@ -108,6 +163,7 @@ app.UseCors("Frontend");
 
 app.UseGlobalExceptionMiddleware();
 
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 

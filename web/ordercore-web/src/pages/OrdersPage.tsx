@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
+import { authRoles } from "../api/auth";
 import { getCustomers } from "../api/customers";
 import type { CustomerResponse } from "../api/customers";
 import { cancelOrder, createOrder, getOrders, payOrder } from "../api/orders";
@@ -8,6 +9,7 @@ import type { OrderSummaryResponse } from "../api/orders";
 import { getProducts } from "../api/products";
 import type { ProductResponse } from "../api/products";
 import Modal from "../components/Modal";
+import { hasAnyRole } from "../auth/session";
 
 type OrderDraftItem = {
   id: string;
@@ -62,6 +64,8 @@ export default function OrdersPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [processingOrderId, setProcessingOrderId] = useState("");
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const canCreateOrders = hasAnyRole(authRoles.admin, authRoles.sales);
+  const canProcessOrders = hasAnyRole(authRoles.admin, authRoles.finance);
 
   const productsById = useMemo(
     () => new Map(products.map((product) => [product.id, product])),
@@ -263,13 +267,15 @@ export default function OrdersPage() {
           >
             Refresh data
           </button>
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            className="button primary"
-          >
-            New order
-          </button>
+          {canCreateOrders && (
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="button primary"
+            >
+              New order
+            </button>
+          )}
         </div>
       </header>
 
@@ -323,7 +329,7 @@ export default function OrdersPage() {
               </thead>
               <tbody>
                 {orders.map((order) => {
-                  const canProcess = order.status === "Pending";
+                  const canProcess = canProcessOrders && order.status === "Pending";
                   const isProcessing = processingOrderId === order.id;
                   const customer = customersById.get(order.customerId);
 

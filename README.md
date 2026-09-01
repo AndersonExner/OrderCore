@@ -26,6 +26,7 @@ OrderCore.Api -> PostgreSQL outbox -> RabbitMQ -> OrderCore.Worker -> notificati
 - Vite
 - Docker
 - NLog
+- JWT authentication
 
 ## Planned
 
@@ -52,6 +53,13 @@ RabbitMQ Management: http://localhost:15672
 
 The API applies EF Core migrations automatically when running through Docker Compose.
 RabbitMQ Management uses `ordercore` / `ordercore` in the local Compose stack.
+
+Create a local account from the frontend login page or through:
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+```
 
 ## Status
 

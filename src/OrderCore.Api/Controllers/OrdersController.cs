@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using OrderCore.Api.Security;
 using OrderCore.Application.Orders.Commands;
 using OrderCore.Application.Orders.Dtos;
 using OrderCore.Application.Orders.Queries;
@@ -6,6 +8,7 @@ using OrderCore.Application.Orders.Queries;
 namespace OrderCore.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/orders")]
     public class OrdersController : ControllerBase
     {
@@ -30,6 +33,7 @@ namespace OrderCore.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = AuthPolicies.CreateOrders)]
         [ProducesResponseType(typeof(CreateOrderResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -43,6 +47,7 @@ namespace OrderCore.Api.Controllers
         }
 
         [HttpPost("{id:guid}/pay")]
+        [Authorize(Policy = AuthPolicies.ProcessOrders)]
         [ProducesResponseType(typeof(GetOrderByIdResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -54,6 +59,7 @@ namespace OrderCore.Api.Controllers
         }
 
         [HttpPost("{id:guid}/cancel")]
+        [Authorize(Policy = AuthPolicies.ProcessOrders)]
         [ProducesResponseType(typeof(GetOrderByIdResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]

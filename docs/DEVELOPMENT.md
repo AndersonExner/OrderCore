@@ -34,6 +34,60 @@ Swagger is available in development at:
 https://localhost:7171/swagger
 ```
 
+## Authentication
+
+The API uses JWT bearer authentication.
+
+Local JWT settings live under `Jwt` in `src/OrderCore.Api/appsettings.json` and can be overridden with environment variables:
+
+```text
+Jwt__Issuer
+Jwt__Audience
+Jwt__SigningKey
+Jwt__ExpirationMinutes
+```
+
+The local signing key must contain at least 32 bytes. Replace it before using the project outside local development.
+
+Create a user:
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "userName": "admin",
+  "email": "admin@email.com",
+  "password": "Admin123!",
+  "role": "Admin"
+}
+```
+
+Login:
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "userNameOrEmail": "admin",
+  "password": "Admin123!"
+}
+```
+
+Use the returned `accessToken` as:
+
+```text
+Authorization: Bearer <accessToken>
+```
+
+Roles:
+
+- `Admin`: manages customers, products, orders, and payment actions.
+- `Sales`: manages customers and creates orders.
+- `Finance`: pays and cancels orders.
+- `Viewer`: reads protected data.
+
 ## Docker Compose
 
 Run the full local stack from the repository root:
@@ -65,6 +119,10 @@ Outbox__MaxRetryCount=5
 Messaging__OutboxPublisher=RabbitMq
 RabbitMq__ExchangeName=ordercore.events
 RabbitMq__OrderPaidQueueName=ordercore.order-paid
+Jwt__Issuer=OrderCore
+Jwt__Audience=OrderCore.Web
+Jwt__SigningKey=local-development-ordercore-signing-key-please-change
+Jwt__ExpirationMinutes=120
 ```
 
 When a paid order is processed by the outbox worker, the API publishes the message to the durable topic exchange `ordercore.events` with routing key `orders.paid`. The local queue `ordercore.order-paid` is declared and bound automatically when `RabbitMq:DeclareTopology=true`.
@@ -136,11 +194,12 @@ The API CORS policy currently allows this frontend origin.
 
 With Docker Compose running:
 
-1. Create a customer, product, and order through Swagger or the frontend.
-2. Pay the order.
-3. Confirm the outbox message becomes `Processed` in PostgreSQL.
-4. Confirm the RabbitMQ queue `ordercore.order-paid` no longer has a ready message after the worker consumes it.
-5. Confirm the frontend header shows an unread payment notification.
+1. Register or login with an `Admin` account.
+2. Create a customer, product, and order through Swagger or the frontend.
+3. Pay the order.
+4. Confirm the outbox message becomes `Processed` in PostgreSQL.
+5. Confirm the RabbitMQ queue `ordercore.order-paid` no longer has a ready message after the worker consumes it.
+6. Confirm the frontend header shows an unread payment notification.
 
 ## Database and Migrations
 

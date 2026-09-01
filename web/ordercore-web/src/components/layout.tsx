@@ -1,7 +1,16 @@
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { clearAuthSession, getCurrentUser } from "../auth/session";
 import NotificationsMenu from "./NotificationsMenu";
 
 export default function Layout() {
+  const navigate = useNavigate();
+  const user = getCurrentUser();
+
+  function handleLogout() {
+    clearAuthSession();
+    navigate("/login", { replace: true });
+  }
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -47,7 +56,18 @@ export default function Layout() {
               </a>
             </nav>
 
+            {user && (
+              <div className="user-chip">
+                <strong>{user.userName}</strong>
+                <span>{user.role}</span>
+              </div>
+            )}
+
             <NotificationsMenu />
+
+            <button type="button" className="button compact header-logout" onClick={handleLogout}>
+              Logout
+            </button>
           </div>
         </div>
       </header>

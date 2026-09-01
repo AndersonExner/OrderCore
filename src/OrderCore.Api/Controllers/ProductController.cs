@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using OrderCore.Api.Security;
 using OrderCore.Application.Products.Commands;
 using OrderCore.Application.Products.Dtos;
 using OrderCore.Application.Products.Queries;
@@ -6,6 +8,7 @@ using OrderCore.Application.Products.Queries;
 namespace OrderCore.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/products")]
     public class ProductsController : ControllerBase
     {
@@ -24,6 +27,7 @@ namespace OrderCore.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = AuthPolicies.ManageProducts)]
         [ProducesResponseType(typeof(CreateProductResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create(

@@ -1,6 +1,28 @@
 @OrderCore.Api_HostAddress = http://localhost:5282
 
-GET {{OrderCore.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{OrderCore.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
 
+{
+  "userName": "admin",
+  "email": "admin@email.com",
+  "password": "Admin123!",
+  "role": "Admin"
+}
+
+###
+
+POST {{OrderCore.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "userNameOrEmail": "admin",
+  "password": "Admin123!"
+}
+
+###
+
+GET {{OrderCore.Api_HostAddress}}/api/products
+Authorization: Bearer {{accessToken}}
+Accept: application/json
 ###

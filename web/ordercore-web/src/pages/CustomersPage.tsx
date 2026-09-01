@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
 import Modal from "../components/Modal";
+import { authRoles } from "../api/auth";
 import { createCustomer, getCustomers, searchCustomer } from "../api/customers";
 import type { CustomerResponse } from "../api/customers";
+import { hasAnyRole } from "../auth/session";
 
 type Feedback = {
   type: "success" | "error";
@@ -24,6 +26,7 @@ export default function CustomersPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const canCreateCustomers = hasAnyRole(authRoles.admin, authRoles.sales);
 
   const emailDomains = useMemo(() => {
     return new Set(
@@ -108,13 +111,15 @@ export default function CustomersPage() {
           >
             Refresh data
           </button>
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            className="button primary"
-          >
-            New customer
-          </button>
+          {canCreateCustomers && (
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="button primary"
+            >
+              New customer
+            </button>
+          )}
         </div>
       </header>
 
