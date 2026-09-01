@@ -30,6 +30,7 @@ OrderCore.Contracts
 
 Contains the core business model:
 
+- `ApplicationUser`
 - `Customer`
 - `Product`
 - `Order`
@@ -57,6 +58,8 @@ Order processing services coordinate customer lookup, product lookup, stock chan
 
 Payment also writes an outbox message through an application repository abstraction. This keeps the application layer independent from EF Core while allowing infrastructure to persist integration events in PostgreSQL.
 
+Authentication use cases register users, verify credentials, and return JWT authentication responses. Password hashing and token generation stay behind application abstractions so the use cases do not depend directly on cryptography or ASP.NET Core infrastructure.
+
 ### `OrderCore.Infrastructure`
 
 Contains EF Core persistence details:
@@ -69,6 +72,8 @@ Contains EF Core persistence details:
 
 Infrastructure translates repository abstractions into database access.
 
+Infrastructure also provides PBKDF2 password hashing and persistence for `ApplicationUser`.
+
 ### `OrderCore.Api`
 
 Contains HTTP concerns:
@@ -77,10 +82,21 @@ Contains HTTP concerns:
 - middleware
 - CORS
 - Swagger
+- JWT bearer authentication
+- role-based authorization policies
 - service registration
 - ASP.NET Core pipeline setup
 
 Controllers should stay thin and delegate behavior to application services.
+
+`AuthController` exposes anonymous login and registration endpoints. Resource controllers require JWT authentication. Mutating actions are guarded with role policies:
+
+| Policy | Roles |
+| --- | --- |
+| `ManageCustomers` | `Admin`, `Sales` |
+| `ManageProducts` | `Admin` |
+| `CreateOrders` | `Admin`, `Sales` |
+| `ProcessOrders` | `Admin`, `Finance` |
 
 The API also owns runtime logging configuration. Application code should log through `ILogger<T>`; NLog is registered as the provider at the API boundary and writes to console, rolling files, and an optional local UDP target for Log2Console-style inspection.
 
@@ -105,6 +121,7 @@ Typical create flow:
 
 ```text
 HTTP request
+  -> JWT authentication and authorization policy
   -> Controller
   -> Application service
   -> Domain entity/rules
@@ -208,6 +225,7 @@ Typical read flow:
 
 ```text
 HTTP request
+  -> JWT authentication
   -> Controller
   -> Query service
   -> Repository abstraction

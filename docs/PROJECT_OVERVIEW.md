@@ -9,6 +9,9 @@ The long-term direction is to grow into a distributed backend system that can de
 - Create and list customers.
 - Find customers by id.
 - Search customers by email or name.
+- Register application users.
+- Authenticate users with JWT access tokens.
+- Protect API routes with role-based authorization.
 - Create and list products.
 - Find products by id.
 - Create orders while decreasing product stock.
@@ -25,6 +28,17 @@ The long-term direction is to grow into a distributed backend system that can de
 - Enforce basic domain rules for customer data, product pricing and stock, order items, and order status transitions.
 
 ## Main Business Concepts
+
+### Application User
+
+An application user has a user name, email, password hash, and role. User names and emails are normalized before persistence. Passwords are stored as PBKDF2 hashes; raw passwords are never persisted.
+
+Current roles:
+
+- `Admin`: can manage customers, products, orders, and payment actions.
+- `Sales`: can manage customers and create orders.
+- `Finance`: can pay or cancel orders.
+- `Viewer`: can read protected data.
 
 ### Customer
 
@@ -67,6 +81,9 @@ https://localhost:7171
 Main routes:
 
 ```text
+POST /api/auth/register
+POST /api/auth/login
+
 POST /api/customers
 GET  /api/customers
 GET  /api/customers/{id}
@@ -86,6 +103,20 @@ GET  /api/notifications?unreadOnly={true-or-false}&limit={count}
 POST /api/notifications/{id}/read
 ```
 
+All routes except `/api/auth/register` and `/api/auth/login` require a valid JWT bearer token.
+
+Role rules:
+
+```text
+POST /api/customers           Admin, Sales
+POST /api/products            Admin
+POST /api/orders              Admin, Sales
+POST /api/orders/{id}/pay     Admin, Finance
+POST /api/orders/{id}/cancel  Admin, Finance
+GET routes                    authenticated users
+notification routes           authenticated users
+```
+
 Swagger is enabled in development and opens under:
 
 ```text
@@ -99,13 +130,14 @@ The frontend is a React/Vite app under `web/ordercore-web`.
 Current routes:
 
 ```text
+/login
 /
 /customers
 /products
 /orders
 ```
 
-The frontend calls the API through helpers in `web/ordercore-web/src/api`, with the base URL defined in `web/ordercore-web/src/api/http.ts`. The shared layout includes a notification menu that polls recent notifications and highlights unread payment confirmations.
+The frontend calls the API through helpers in `web/ordercore-web/src/api`, with the base URL defined in `web/ordercore-web/src/api/http.ts`. The login page stores the JWT session locally and API helpers attach the bearer token to protected requests. The shared layout includes a notification menu that polls recent notifications and highlights unread payment confirmations.
 
 ## Planned Evolution
 

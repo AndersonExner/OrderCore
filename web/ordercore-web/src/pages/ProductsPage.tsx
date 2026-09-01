@@ -2,8 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
 import Modal from "../components/Modal";
+import { authRoles } from "../api/auth";
 import { createProduct, getProducts } from "../api/products";
 import type { ProductResponse } from "../api/products";
+import { hasAnyRole } from "../auth/session";
 
 type Feedback = {
   type: "success" | "error";
@@ -41,6 +43,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const canCreateProducts = hasAnyRole(authRoles.admin);
 
   const inventoryValue = useMemo(
     () =>
@@ -132,13 +135,15 @@ export default function ProductsPage() {
           >
             Refresh data
           </button>
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            className="button primary"
-          >
-            New product
-          </button>
+          {canCreateProducts && (
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(true)}
+              className="button primary"
+            >
+              New product
+            </button>
+          )}
         </div>
       </header>
 
@@ -164,7 +169,7 @@ export default function ProductsPage() {
       )}
 
       <section className="panel panel-pad">
-        <h2 className="panel-title">Catalog snapshot</h2>
+        <h2 className="panel-title">Catalog overview</h2>
         <div style={{ marginTop: "10px" }}>
           <div className="home-signal">
             <span className="muted">Average price</span>

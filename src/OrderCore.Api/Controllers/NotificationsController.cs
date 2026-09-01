@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OrderCore.Application.Notifications.Commands;
 using OrderCore.Application.Notifications.Dtos;
@@ -6,6 +7,7 @@ using OrderCore.Application.Notifications.Queries;
 namespace OrderCore.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/notifications")]
     public class NotificationsController : ControllerBase
     {

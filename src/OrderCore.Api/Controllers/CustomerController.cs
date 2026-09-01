@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using OrderCore.Api.Security;
 using OrderCore.Application.Customers.Commands;
 using OrderCore.Application.Customers.Dtos;
 using OrderCore.Application.Customers.Queries;
@@ -6,6 +8,7 @@ using OrderCore.Application.Customers.Queries;
 namespace OrderCore.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/customers")]
     public class CustomersController : ControllerBase
     {
@@ -27,6 +30,7 @@ namespace OrderCore.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = AuthPolicies.ManageCustomers)]
         [ProducesResponseType(typeof(CreateCustomerResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create(
@@ -77,5 +81,3 @@ namespace OrderCore.Api.Controllers
         }
     }
 }
-
-

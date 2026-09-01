@@ -62,6 +62,10 @@ services:
       RabbitMq__ExchangeType: topic
       RabbitMq__OrderPaidQueueName: ordercore.order-paid
       RabbitMq__DeclareTopology: "true"
+      Jwt__Issuer: OrderCore
+      Jwt__Audience: OrderCore.Web
+      Jwt__SigningKey: local-development-ordercore-signing-key-please-change
+      Jwt__ExpirationMinutes: "120"
       ORDERCORE_LOG_NETWORK_ENABLED: ${ORDERCORE_LOG_NETWORK_ENABLED:-false}
       ORDERCORE_LOG_NETWORK_ADDRESS: ${ORDERCORE_LOG_NETWORK_ADDRESS:-udp4://host.docker.internal:9998}
     ports:
